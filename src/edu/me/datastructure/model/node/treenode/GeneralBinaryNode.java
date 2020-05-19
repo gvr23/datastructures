@@ -36,6 +36,18 @@ public abstract class GeneralBinaryNode<T> extends GeneralTreeNode<T> {
         return this.left.getLeft() != null || this.left.getRight() != null;
     }
 
+    @Override
+    public boolean checkEquality(T nodeToCompare) {
+        boolean equal = false;
+        if (nodeToCompare != null) {
+            GeneralBinaryNode<T> nodeToCompareMod = (GeneralBinaryNode<T>) nodeToCompare;
+            if (nodeToCompareMod.getNumber() == this.getNumber()) {
+                if (nodeToCompareMod.getData().equals(this.getData())) equal = true;
+            }
+        }
+        return equal;
+    }
+
     public void setLeft(GeneralBinaryNode<T> left) {
         this.left = left;
     }
@@ -50,6 +62,5 @@ public abstract class GeneralBinaryNode<T> extends GeneralTreeNode<T> {
     }
     public boolean hasLeftChild() { return this.left != null; }
     public boolean hasRightChild() { return this.right != null; }
-
 }
 

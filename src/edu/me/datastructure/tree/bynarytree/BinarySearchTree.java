@@ -10,11 +10,6 @@ public class BinarySearchTree<T> extends GeneralBinarySearchTree<T> {
     }
 
     @Override
-    public boolean checkEquality(T firstNode, T secondNode) {
-        return false;
-    }
-
-    @Override
     public void insert(T item) {
         if (!this.checkIfNull(item)) {
             if (this.isEmpty()) this.setRoot(item);

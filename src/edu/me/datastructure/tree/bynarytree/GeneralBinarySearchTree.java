@@ -1,6 +1,7 @@
 package edu.me.datastructure.tree.bynarytree;
 
 import edu.me.datastructure.model.node.treenode.GeneralBinaryNode;
+import edu.me.datastructure.model.node.treenode.GeneralBinarySearchNode;
 import edu.me.datastructure.queue.CircularArrayQueue;
 
 public  abstract class GeneralBinarySearchTree<T> extends GeneralBinaryTree<T> {
@@ -9,13 +10,13 @@ public  abstract class GeneralBinarySearchTree<T> extends GeneralBinaryTree<T> {
     }
 
     protected T searchCorrectParent(T item) {
-        GeneralBinaryNode<Integer> current = (GeneralBinaryNode<Integer>) this.getRoot();
-        GeneralBinaryNode<Integer> previous = current;
-        GeneralBinaryNode<Integer> itemMod = (GeneralBinaryNode<Integer>) item;
-        while (!this.checkIfNull((T) current) && !this.checkEquality((T) current, item)) {
+        GeneralBinarySearchNode<T> current = (GeneralBinarySearchNode<T>) this.getRoot();
+        GeneralBinarySearchNode<T> previous = current;
+        GeneralBinarySearchNode<T> itemMod = (GeneralBinarySearchNode<T>) item;
+        while (!this.checkIfNull((T) current) && !itemMod.checkEquality((T) current)) {
             previous = current;
-            if (itemMod.getData() < current.getData()) current = current.getLeft();
-            else current = current.getRight();
+            if (itemMod.getNumber() < current.getNumber()) current = (GeneralBinarySearchNode<T>) current.getLeft();
+            else current = (GeneralBinarySearchNode<T>) current.getRight();
         }
         return (T) previous;
     }
@@ -37,23 +38,23 @@ public  abstract class GeneralBinarySearchTree<T> extends GeneralBinaryTree<T> {
 
     @Override
     protected void removeLeaf(T nodeToRemove) {
-        GeneralBinaryNode<Integer> parent = (GeneralBinaryNode<Integer>) this.getParentFromLeaf(nodeToRemove);
-        if (this.checkEquality((T) parent.getRight(), nodeToRemove)) parent.setRight(null);
+        GeneralBinarySearchNode<Integer> parent = (GeneralBinarySearchNode<Integer>) this.getParentFromLeaf(nodeToRemove);
+        if (parent.getRight().checkEquality((Integer) nodeToRemove)) parent.setRight(null);
         else parent.setLeft(null);
     }
     @Override
     protected void removeInternalNode(T nodeToRemove) {
         T child = this.getInOrderSuccessor(nodeToRemove);
-        if (((GeneralBinaryNode<Integer>)nodeToRemove).hasLeftChild()) child = this.getDownwardsPredecessor(nodeToRemove);
+        if (((GeneralBinarySearchNode<Integer>)nodeToRemove).hasLeftChild()) child = this.getDownwardsPredecessor(nodeToRemove);
 
         this.transferChildData(nodeToRemove, child);
     }
     @Override
     protected void transferChildData(T parent, T child) {
-        GeneralBinaryNode<T> parentMod = (GeneralBinaryNode<T>) parent;
-        GeneralBinaryNode<T> childMod = (GeneralBinaryNode<T>) child;
+        GeneralBinaryNode<T> parentMod = (GeneralBinarySearchNode<T>) parent;
+        GeneralBinaryNode<T> childMod = (GeneralBinarySearchNode<T>) child;
         if (this.determineIfRightSubTree(child, parent)) {
-            if (this.checkEquality((T) parentMod.getRight(), child)) {
+            if (parentMod.getRight().checkEquality(child)) {
                 parentMod.setData(childMod.getData());
                 if (childMod.hasNoChildren()) parentMod.setRight(null);
                 else {
@@ -67,7 +68,7 @@ public  abstract class GeneralBinarySearchTree<T> extends GeneralBinaryTree<T> {
         }
         else {
             parentMod.setData(childMod.getData());
-            if (this.checkEquality((T) parentMod.getLeft(), child)) {
+            if (parentMod.getLeft().checkEquality(child)) {
                 if (childMod.hasNoChildren()) parentMod.setLeft(null);
                 else {
                     parentMod.setLeft(childMod.getLeft());
@@ -101,13 +102,14 @@ public  abstract class GeneralBinarySearchTree<T> extends GeneralBinaryTree<T> {
     @Override
     public int calculateNodeDepth(T node, T wildCard) {
         int nodeDepth;
-        if (this.getQuantity() <= 1 || this.checkEquality(this.getRoot(), node)) nodeDepth = 0;
+        GeneralBinarySearchNode<T> nodeMod = (GeneralBinarySearchNode<T>) node;
+        if (this.getQuantity() <= 1 || nodeMod.checkEquality(this.getRoot())) nodeDepth = 0;
         else {
             nodeDepth = 0;
             CircularArrayQueue<T> auxQueue = createQueueAndEnqueue(wildCard, this.getRoot());
             while (!auxQueue.isEmpty()) {
                 GeneralBinaryNode<T> current = (GeneralBinaryNode<T>) auxQueue.deque();
-                if (this.checkEquality((T) current, node)) break;
+                if (current.checkEquality(node)) break;
                 else if (this.keepLevelTraversing((T) current, wildCard, auxQueue)) nodeDepth++;
                 if (!current.hasNoChildren()) {
                     if (current.hasLeftChild()) auxQueue.enqueue((T) current.getLeft());
@@ -124,8 +126,8 @@ public  abstract class GeneralBinarySearchTree<T> extends GeneralBinaryTree<T> {
         if (this.isEmpty() || this.checkIfNull(node) || checkIfOneNode()) return nodeHeight;
         CircularArrayQueue<T> auxQueue = createQueueAndEnqueue(wildCard, node);
         while (!auxQueue.isEmpty()) {
-            GeneralBinaryNode<T> current = (GeneralBinaryNode<T>) auxQueue.deque();
-            if (this.checkEquality((T) current, wildCard)) {
+            GeneralBinarySearchNode<T> current = (GeneralBinarySearchNode<T>) auxQueue.deque();
+            if (current.checkEquality(wildCard)) {
                 if (!auxQueue.isEmpty()) {
                     nodeHeight++;
                     auxQueue.enqueue(wildCard);
@@ -135,22 +137,5 @@ public  abstract class GeneralBinarySearchTree<T> extends GeneralBinaryTree<T> {
             if (current.hasRightChild()) auxQueue.enqueue((T) current.getRight());
         }
         return nodeHeight;
-    }
-
-    @Override
-    public boolean checkEquality(T firstNode, T secondNode) {
-        boolean equal = false;
-        if (!this.checkIfNull(firstNode) && !this.checkIfNull(secondNode)) {
-            GeneralBinaryNode<T> firstMod = (GeneralBinaryNode<T>) firstNode;
-            GeneralBinaryNode<T> secondMod = (GeneralBinaryNode<T>) secondNode;
-            if (firstMod.getLeft() == secondMod.getLeft()) {
-                if (firstMod.getRight() == secondMod.getRight()) {
-                    if (secondMod.getData() == ((GeneralBinaryNode<T>) secondNode).getData()) {
-                        if (firstMod.getNumber() == secondMod.getNumber()) equal = true;
-                    }
-                }
-            }
-        }
-        return equal;
     }
 }

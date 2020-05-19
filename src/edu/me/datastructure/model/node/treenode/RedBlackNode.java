@@ -1,6 +1,6 @@
 package edu.me.datastructure.model.node.treenode;
 
-public class RedBlackNode<T> extends GeneralBinaryNode<T> {
+public class RedBlackNode<T> extends GeneralBinarySearchNode<T> {
     public enum NodeColor {
         RED,
         BLACK,
@@ -17,10 +17,6 @@ public class RedBlackNode<T> extends GeneralBinaryNode<T> {
     public void reColor() {
         if (this.isBlack()) this.color = NodeColor.RED;
         else this.color = NodeColor.BLACK;
-    }
-    public void setParent(RedBlackNode<T> parent) {
-        if (this.getNumber() < parent.getNumber()) parent.setLeft(this);
-        else parent.setRight(this);
     }
     public NodeColor getColor() { return color; }
     public void setColor(NodeColor color) {

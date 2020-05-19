@@ -22,15 +22,15 @@ public abstract class GeneralBalancedTree<T> extends GeneralBinarySearchTree<T> 
             ArrayStack<T> auxStack = this.createStackAndPush(this.getRoot());
             T current = auxStack.pop();
             int balanceFactor;
-            GeneralBinarySearchNode currentMod = (GeneralBinarySearchNode) current;
-            while (!this.checkIfNull((T) currentMod) && !currentMod.hasNoChildren() && !this.checkEquality((T) currentMod, evaluatedNode)) {
+            GeneralBinarySearchNode<T> currentMod = (GeneralBinarySearchNode<T>) current;
+            while (!this.checkIfNull((T) currentMod) && !currentMod.hasNoChildren() && !currentMod.checkEquality(evaluatedNode)) {
                 auxStack.push((T) currentMod);
                 if (this.determineIfRightSubTree(evaluatedNode, (T) currentMod)) currentMod = (GeneralBinarySearchNode) currentMod.getRight();
                 else currentMod = (GeneralBinarySearchNode) currentMod.getLeft();
             }
             while (!auxStack.isEmpty()) {
                 currentMod = (GeneralBinarySearchNode) auxStack.pop();
-                balanceFactor = this.determineBalanceFactor((T) currentMod, (T) new GeneralBinaryNode<T>(null, -5));
+                balanceFactor = this.determineBalanceFactor((T) currentMod, (T) new BinaryNode<T>(null, -5));
                 if (balanceFactor < -1 || balanceFactor > 1) {
                     this.executeBalancingCase(balanceFactor, (T) currentMod);
                     break;
@@ -39,7 +39,7 @@ public abstract class GeneralBalancedTree<T> extends GeneralBinarySearchTree<T> 
         }
     }
     protected int determineBalanceFactor(T evaluatedNode, T wildCard) {
-        GeneralBinaryNode<T> node = (GeneralBinaryNode<T>) evaluatedNode;
+        GeneralBinarySearchNode<T> node = (GeneralBinarySearchNode<T>) evaluatedNode;
         if (!node.hasNoChildren() && this.getQuantity() > 1) {
             int leftSideHeight = (node.hasLeftChild()) ? 1 : 0;
             int rightSideHeight = (node.hasRightChild()) ? 1 : 0;
@@ -62,65 +62,65 @@ public abstract class GeneralBalancedTree<T> extends GeneralBinarySearchTree<T> 
         else determineRightHeavyRotation(evaluatedNode);
     }
     private void determineLeftHeavyRotation(T evaluatedNode) {
-        GeneralBinaryNode<T> evaluatedNodeMod = (GeneralBinaryNode<T>) evaluatedNode;
+        GeneralBinaryNode<T> evaluatedNodeMod = (GeneralBinarySearchNode<T>) evaluatedNode;
         if (evaluatedNodeMod.hasLeftChild() && (!evaluatedNodeMod.getLeft().hasRightChild() ||
                 (evaluatedNodeMod.getLeft().hasAllChildren() && evaluatedNodeMod.hasLeftGrandChildren()))) this.rightRotation(evaluatedNode);
         else this.leftRightRotation(evaluatedNode);
     }
     private void determineRightHeavyRotation(T evaluatedNode) {
-        GeneralBinaryNode<T> evaluatedNodeMod = (GeneralBinaryNode<T>) evaluatedNode;
+        GeneralBinaryNode<T> evaluatedNodeMod = (GeneralBinarySearchNode<T>) evaluatedNode;
         if (evaluatedNodeMod.hasRightChild() && (!evaluatedNodeMod.getRight().hasLeftChild() ||
                 (evaluatedNodeMod.getRight().hasAllChildren() && evaluatedNodeMod.hasRightGrandChildren()))) this.leftRotation(evaluatedNode);
         else this.rightLeftRotation(evaluatedNode);
     }
     protected void leftRotation(T evaluatedNode) {
-        GeneralBinaryNode<T> evaluatedNodeMod = (GeneralBinaryNode<T>) evaluatedNode;
+        GeneralBinaryNode<T> evaluatedNodeMod = (GeneralBinarySearchNode<T>) evaluatedNode;
         GeneralBinaryNode<T> parent = evaluatedNodeMod.getRight();
-        if (this.checkEquality((T) evaluatedNodeMod, this.getRoot())) this.setRoot((T) parent);
+        if (evaluatedNodeMod.checkEquality(this.getRoot())) this.setRoot((T) parent);
         else {
-            GeneralBinaryNode<T> grandFather = (GeneralBinaryNode<T>) this.searchCorrectParent(evaluatedNode);
+            GeneralBinaryNode<T> grandFather = (GeneralBinarySearchNode<T>) this.searchCorrectParent(evaluatedNode);
             grandFather.setRight(parent);
         }
         evaluatedNodeMod.setRight(parent.getLeft());
         parent.setLeft(evaluatedNodeMod);
     }
     protected void rightRotation(T evaluatedNode) {
-        GeneralBinaryNode<T> evaluatedNodeMod = (GeneralBinaryNode<T>) evaluatedNode;
+        GeneralBinaryNode<T> evaluatedNodeMod = (GeneralBinarySearchNode<T>) evaluatedNode;
         GeneralBinaryNode<T> parent = evaluatedNodeMod.getLeft();
-        if (this.checkEquality((T) evaluatedNodeMod, this.getRoot())) this.setRoot((T) parent);
+        if (evaluatedNodeMod.checkEquality(this.getRoot())) this.setRoot((T) parent);
         else {
-            GeneralBinaryNode<T> grandFather = (GeneralBinaryNode<T>) this.getInOrderSuccessor(evaluatedNode);
+            GeneralBinaryNode<T> grandFather = (GeneralBinarySearchNode<T>) this.getInOrderSuccessor(evaluatedNode);
             grandFather.setLeft(parent);
         }
         evaluatedNodeMod.setLeft(parent.getRight());
         parent.setRight(evaluatedNodeMod);
     }
     protected void leftRightRotation(T evaluatedNode) {
-        GeneralBinaryNode<T> evaluatedNodeMod = (GeneralBinaryNode<T>) evaluatedNode;
+        GeneralBinaryNode<T> evaluatedNodeMod = (GeneralBinarySearchNode<T>) evaluatedNode;
         GeneralBinaryNode<T> leftChild = evaluatedNodeMod.getLeft();
         GeneralBinaryNode<T> parent = leftChild.getRight();
-        GeneralBinaryNode<T> grandFather = (GeneralBinaryNode<T>) this.searchCorrectParent(evaluatedNode);
+        GeneralBinaryNode<T> grandFather = (GeneralBinarySearchNode<T>) this.searchCorrectParent(evaluatedNode);
 
         leftChild.setRight(parent.getLeft());
         evaluatedNodeMod.setLeft(parent.getRight());
         parent.setLeft(leftChild);
         parent.setRight(evaluatedNodeMod);
 
-        if (this.checkEquality((T) grandFather.getRight(), evaluatedNode)) grandFather.setRight(parent);
+        if (grandFather.getRight().checkEquality(evaluatedNode)) grandFather.setRight(parent);
         else grandFather.setLeft(parent);
     }
     protected void rightLeftRotation(T evaluatedNode) {
-        GeneralBinaryNode<T> evaluatedNodeMod = (GeneralBinaryNode<T>) evaluatedNode;
+        GeneralBinaryNode<T> evaluatedNodeMod = (GeneralBinarySearchNode<T>) evaluatedNode;
         GeneralBinaryNode<T> rightChild = evaluatedNodeMod.getRight();
         GeneralBinaryNode<T> parent = rightChild.getLeft();
-        GeneralBinaryNode<T> grandFather = (GeneralBinaryNode<T>) this.searchCorrectParent(evaluatedNode);
+        GeneralBinaryNode<T> grandFather = (GeneralBinarySearchNode<T>) this.searchCorrectParent(evaluatedNode);
 
         rightChild.setLeft(parent.getRight());
         evaluatedNodeMod.setRight(parent.getLeft());
         parent.setLeft(evaluatedNodeMod);
         parent.setRight(rightChild);
 
-        if (this.checkEquality((T) grandFather.getLeft(), evaluatedNode)) grandFather.setLeft(parent);
+        if (grandFather.getLeft().checkEquality(evaluatedNode)) grandFather.setLeft(parent);
         else grandFather.setRight(parent);
     }
 }

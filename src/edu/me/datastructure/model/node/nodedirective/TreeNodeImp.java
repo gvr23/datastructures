@@ -6,6 +6,5 @@ public interface TreeNodeImp<T> {
     boolean hasLeftGrandChildren();
     boolean hasRightGrandChildren();
     int calculateDegree();
-    boolean isLeftChild(T parent);
     boolean checkEquality(T nodeToCompare);
 }

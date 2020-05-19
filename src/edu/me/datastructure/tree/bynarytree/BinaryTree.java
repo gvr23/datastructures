@@ -12,15 +12,10 @@ public class BinaryTree<T> extends GeneralBinaryTree<BinaryNode<T>> {
     }
 
     @Override
-    public boolean checkEquality(BinaryNode<T> firstNode, BinaryNode<T> secondNode) {
-        return false;
-    }
-
-    @Override
     protected void removeLeaf(BinaryNode<T> nodeToRemove) {
         BinaryNode<T> parent;
         parent = this.getParentFromLeaf(nodeToRemove);
-        if (this.checkEquality(nodeToRemove, (BinaryNode<T>) parent.getRight())) parent.setRight(null);
+        if (parent.getRight().checkEquality(nodeToRemove)) parent.setRight(null);
         else parent.setLeft(null);
     }
 

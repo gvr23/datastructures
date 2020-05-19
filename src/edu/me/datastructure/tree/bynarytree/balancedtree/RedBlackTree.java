@@ -33,7 +33,7 @@ public class RedBlackTree<T> extends GeneralBalancedTree<RedBlackNode<T>> {
     }
     private void decideNodeColor(RedBlackNode<T> node) {
         RedBlackNode.NodeColor color;
-        if (this.checkIfOneNode() && this.checkEquality(node, this.getRoot())) color = RedBlackNode.NodeColor.BLACK;
+        if (this.checkIfOneNode() && node.checkEquality((T) this.getRoot())) color = RedBlackNode.NodeColor.BLACK;
         else color = RedBlackNode.NodeColor.RED;
 
         node.setColor(color);
@@ -42,7 +42,7 @@ public class RedBlackTree<T> extends GeneralBalancedTree<RedBlackNode<T>> {
         boolean isThereRedRedConflict = parent.getColor().equals(RedBlackNode.NodeColor.RED) && child.getColor().equals(RedBlackNode.NodeColor.RED);
         this.newestNode = child;
         RedBlackNode<T> uncle;
-        while (isThereRedRedConflict && !this.checkEquality(parent, this.getRoot())) {
+        while (isThereRedRedConflict && !parent.checkEquality((T) this.getRoot())) {
             uncle = this.getSibling(parent);
             parent = this.determineUncleSituation(uncle, parent);
             if (parent.getLeft().getNumber() != child.getNumber()  && parent.getRight().getNumber() != child.getNumber()) {
@@ -57,7 +57,7 @@ public class RedBlackTree<T> extends GeneralBalancedTree<RedBlackNode<T>> {
     private RedBlackNode<T>  getSibling(RedBlackNode<T> parent) {
         RedBlackNode<T> grandFather = this.searchCorrectParent(parent);
         RedBlackNode<T> brother;
-        if (this.checkEquality(parent, (RedBlackNode<T>) grandFather.getLeft())) brother = (RedBlackNode<T>) grandFather.getRight();
+        if (parent.checkEquality((T) grandFather.getLeft())) brother = (RedBlackNode<T>) grandFather.getRight();
         else brother = (RedBlackNode<T>) grandFather.getLeft();
 
         return brother;
@@ -69,7 +69,7 @@ public class RedBlackTree<T> extends GeneralBalancedTree<RedBlackNode<T>> {
         }
         else {
             this.redUncle(uncle, parent);
-            if (!this.checkEquality(grandFather, this.getRoot())) grandFather.reColor();
+            if (!grandFather.checkEquality((T) this.getRoot())) grandFather.reColor();
         }
         return this.searchCorrectParent(grandFather);
     }
@@ -121,7 +121,7 @@ public class RedBlackTree<T> extends GeneralBalancedTree<RedBlackNode<T>> {
     }
     @Override
     protected void rightRotation(RedBlackNode<T> evaluatedNode) {
-        if (this.checkEquality(evaluatedNode, this.getRoot())) this.setRoot(evaluatedNode);
+        if (evaluatedNode.checkEquality((T) this.getRoot())) this.setRoot(evaluatedNode);
         else {
             RedBlackNode<T> grandFather = this.searchCorrectParent(evaluatedNode);
             RedBlackNode<T> parent = (RedBlackNode<T>) evaluatedNode.getLeft();

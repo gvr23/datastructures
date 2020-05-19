@@ -32,7 +32,7 @@ public class ThreadedTree<T> extends GeneralBinaryTree<ThreadedNode<T>> {
             CircularArrayQueue<ThreadedNode<T>> auxQueue = createQueueAndEnqueue(this.getRoot(), (ThreadedNode<T>) this.getRoot().getLeft());
             while (!auxQueue.isEmpty()) {
                 ThreadedNode<T> current = auxQueue.deque();
-                if (keepLevelTraversing(current, this.getRoot(), auxQueue)) if (!this.checkEquality(current, this.getRoot())) if (determineInsert(current, auxQueue, newNode)) break;
+                if (keepLevelTraversing(current, this.getRoot(), auxQueue)) if (!current.checkEquality((T) this.getRoot())) if (determineInsert(current, auxQueue, newNode)) break;
             }
         }
     }
@@ -96,11 +96,11 @@ public class ThreadedTree<T> extends GeneralBinaryTree<ThreadedNode<T>> {
     @Override
     public ThreadedNode<T> removeItem(ThreadedNode<T> nodeToRemove) {
         ThreadedNode<T> nodeCopy = null;
-        if (this.isEmpty() || this.checkIfNull(nodeToRemove) || this.checkEquality(nodeToRemove, this.getRoot())) return nodeCopy;
+        if (this.isEmpty() || this.checkIfNull(nodeToRemove) || nodeToRemove.checkEquality((T) this.getRoot())) return nodeCopy;
         else {
             nodeCopy = new ThreadedNode<>(nodeToRemove.getData(), nodeToRemove.getNumber());
             if (this.checkIfOneNode()) {
-                if (this.checkEquality(nodeToRemove, (ThreadedNode<T>) this.getRoot().getLeft())) {
+                if (nodeToRemove.checkEquality((T) this.getRoot().getLeft())) {
                     nodeCopy = (ThreadedNode<T>) this.getRoot().getLeft();
                     this.getRoot().setLeft(this.getRoot());
                 }
@@ -117,7 +117,7 @@ public class ThreadedTree<T> extends GeneralBinaryTree<ThreadedNode<T>> {
     }
     private ThreadedNode<T> getParent(ThreadedNode<T> child) {
         ThreadedNode<T> possibleParent = (ThreadedNode<T>) this.searchRightMostNode(child).getRight();
-        if (!this.checkEquality((ThreadedNode<T>) possibleParent.getLeft(), child)) {
+        if (!child.checkEquality((T) possibleParent.getLeft())) {
             possibleParent = (ThreadedNode<T>) this.searchLeftMostNode(child).getLeft();
         }
         return possibleParent;
@@ -125,7 +125,7 @@ public class ThreadedTree<T> extends GeneralBinaryTree<ThreadedNode<T>> {
     @Override
     protected void transferChildData(ThreadedNode<T> parent, ThreadedNode<T> child) {
         if (!this.checkIfNull(parent)) {
-            if (this.checkEquality((ThreadedNode<T>) parent.getLeft(), child)) {
+            if (child.checkEquality((T) parent.getLeft())) {
                 parent.setPredecessor(child.getPredecessor());
                 parent.setLeft(child.getLeft());
                 this.transferRightGrandChildren(parent,child);
@@ -194,11 +194,11 @@ public class ThreadedTree<T> extends GeneralBinaryTree<ThreadedNode<T>> {
         else this.removeWithOneChild(child);
     }
     private void transferUntilLastLevel(ThreadedNode<T> nodeToRemove, ThreadedNode<T> inOrderSuccessor) {
-        if (!this.checkEquality((ThreadedNode<T>) nodeToRemove.getRight(), inOrderSuccessor)) {
+        if (!inOrderSuccessor.checkEquality((T) nodeToRemove.getRight())) {
             this.transferInOrderSuccessorData(nodeToRemove, inOrderSuccessor);
         } else {
             this.transferUntilNoChildren(inOrderSuccessor, nodeToRemove);
-            if (!this.checkEquality((ThreadedNode<T>) nodeToRemove.getLeft(), inOrderSuccessor) && !this.checkEquality((ThreadedNode<T>) nodeToRemove.getRight(), inOrderSuccessor)) {
+            if (!inOrderSuccessor.checkEquality((T) nodeToRemove.getLeft()) && !inOrderSuccessor.checkEquality((T) nodeToRemove.getRight())) {
                 this.transferInOrderSuccessorData(nodeToRemove, inOrderSuccessor);
             } else {
                 this.transferChildData(nodeToRemove, inOrderSuccessor);
@@ -230,7 +230,7 @@ public class ThreadedTree<T> extends GeneralBinaryTree<ThreadedNode<T>> {
     @Override
     public ThreadedNode<T> searchForItem(ThreadedNode<T> node) {
         ThreadedNode<T> current = (ThreadedNode<T>) this.getRoot().getLeft();
-        if (!this.checkEquality(current, node)) {
+        if (!node.checkEquality((T) current)) {
             ArrayStack<ThreadedNode<T>> auxStack = this.createStackAndPush(current);
             while (!auxStack.isEmpty()) {
                 current = auxStack.pop();
@@ -253,7 +253,7 @@ public class ThreadedTree<T> extends GeneralBinaryTree<ThreadedNode<T>> {
             while (!auxQueue.isEmpty()) {
                 ThreadedNode<T> current = auxQueue.deque();
                 if (this.keepLevelTraversing(current, this.getRoot(), auxQueue)) {
-                    if (!checkEquality(current, this.getRoot())) {
+                    if (!current.checkEquality((T) this.getRoot())) {
                         System.out.print(String.format(" %s <-- ", current.getData().toString()));
                         if (!current.hasNoChildren()) {
                             if (current.hasLeftChild()) auxQueue.enqueue((ThreadedNode<T>) current.getLeft());
@@ -271,7 +271,7 @@ public class ThreadedTree<T> extends GeneralBinaryTree<ThreadedNode<T>> {
         else if (this.checkIfOneNode()) System.out.print(String.format(" <-- %s", this.getRoot().getLeft().getData()));
         else {
             ThreadedNode<T> current = this.getInOrderSuccessor(this.getRoot());
-            while (!this.checkIfNull(current) && !this.checkEquality(current, this.getRoot())) {
+            while (!this.checkIfNull(current) && !current.checkEquality((T) this.getRoot())) {
                 System.out.print(String.format(" %s <-- ", current.getData()));
                 current = this.getInOrderSuccessor(current);
             }
@@ -294,7 +294,7 @@ public class ThreadedTree<T> extends GeneralBinaryTree<ThreadedNode<T>> {
         else if (this.checkIfOneNode()) System.out.print(String.format(" <-- %s", this.getRoot().getLeft().getData()));
         else {
             ThreadedNode<T> current = (ThreadedNode<T>) this.getRoot().getLeft();
-            while (!this.checkIfNull(current) && !checkEquality(current, this.getRoot())) {
+            while (!this.checkIfNull(current) && !current.checkEquality((T) this.getRoot())) {
                 System.out.print(String.format(" %s <-- ", current.getData()));
                 current = getPreOrderSuccessor(current);
             }
@@ -309,7 +309,7 @@ public class ThreadedTree<T> extends GeneralBinaryTree<ThreadedNode<T>> {
             ThreadedNode<T> current = this.getInOrderSuccessor(this.getRoot());
             while (current.notVisited()) {
                 if (current.hasRightChild() && current.getRight().notVisited()) current = this.getInOrderSuccessor(current);
-                else if (this.checkEquality((ThreadedNode<T>) this.getRoot().getLeft(), current)) {
+                else if (current.checkEquality((T) this.getRoot().getLeft())) {
                     System.out.print(String.format(" %s <-- ", current.getData()));
                     current.addTimesVisited();
                 } else {
@@ -332,16 +332,16 @@ public class ThreadedTree<T> extends GeneralBinaryTree<ThreadedNode<T>> {
     public int calculateNodeDepth(ThreadedNode<T> node, ThreadedNode<T> wildCard) {
         int nodeDepth = -1;
         ThreadedNode<T> current = (ThreadedNode<T>) this.getRoot().getLeft();
-        if (this.getQuantity() <= 1 || this.checkEquality(current, node)) nodeDepth++;
+        if (this.getQuantity() <= 1 || node.checkEquality((T) current)) nodeDepth++;
         else if (!this.checkIfNull(node)) {
             nodeDepth++;
             wildCard = this.getRoot();
             CircularArrayQueue<ThreadedNode<T>> auxQueue = createQueueAndEnqueue(wildCard, current);
             while (!auxQueue.isEmpty()) {
                 current = auxQueue.deque();
-                if (checkEquality(current, node)) return nodeDepth;
-                else if (keepLevelTraversing(current, wildCard, auxQueue) && this.checkEquality(wildCard, current)) nodeDepth++;
-                if (!current.hasNoChildren() && !checkEquality(current, wildCard)) {
+                if (node.checkEquality((T) current)) return nodeDepth;
+                else if (keepLevelTraversing(current, wildCard, auxQueue) && wildCard.checkEquality((T) current)) nodeDepth++;
+                if (!current.hasNoChildren() && !wildCard.checkEquality((T) current)) {
                     if (current.hasLeftChild()) auxQueue.enqueue((ThreadedNode<T>) current.getLeft());
                     if (current.hasRightChild()) auxQueue.enqueue((ThreadedNode<T>) current.getRight());
                 }
@@ -353,17 +353,17 @@ public class ThreadedTree<T> extends GeneralBinaryTree<ThreadedNode<T>> {
 
     @Override
     public int calculateSubTreeNodeHeight(ThreadedNode<T> node, ThreadedNode<T> wildCard) {
-        if (checkEquality(node, this.getRoot())) return this.calculateTreeHeight();
+        if (node.checkEquality((T) this.getRoot())) return this.calculateTreeHeight();
         int nodeHeight = 0;
         if (this.isEmpty() || checkIfNull(node) || checkIfOneNode()) return nodeHeight;
         CircularArrayQueue<ThreadedNode<T>> auxQueue = this.createQueueAndEnqueue(wildCard, node);
         while (!auxQueue.isEmpty()) {
             ThreadedNode<T> current = auxQueue.deque();
-            if (this.keepLevelTraversing(current, wildCard, auxQueue) && this.checkEquality(wildCard, current)) {
+            if (this.keepLevelTraversing(current, wildCard, auxQueue) && wildCard.checkEquality((T) current)) {
                 nodeHeight++;
                 continue;
             }
-            if (!this.checkEquality(this.getRoot(), current) && !current.hasNoChildren()) {
+            if (!current.checkEquality((T) this.getRoot()) && !current.hasNoChildren()) {
                 if (current.hasLeftChild()) auxQueue.enqueue((ThreadedNode<T>) current.getLeft());
                 if (current.hasRightChild()) auxQueue.enqueue((ThreadedNode<T>) current.getRight());
             }
@@ -374,14 +374,14 @@ public class ThreadedTree<T> extends GeneralBinaryTree<ThreadedNode<T>> {
     private void resetAllNodesVisited() {
         if (!this.isEmpty() && !this.checkIfOneNode()) {
             ThreadedNode<T> current = this.getInOrderSuccessor(this.getRoot());
-            while (!this.checkIfNull(current) && !this.checkEquality(current, this.getRoot())) {
+            while (!this.checkIfNull(current) && !current.checkEquality((T) this.getRoot())) {
                 current.resetTimesVisited();
                 current = this.getInOrderSuccessor(current);
             }
         }
     }
 
-    @Override
+/*    @Override
     public boolean checkEquality(ThreadedNode<T> firstNode, ThreadedNode<T> secondNode) {
         boolean equal = false;
         if (!this.checkIfNull(firstNode) && !this.checkIfNull(secondNode)) {
@@ -394,7 +394,7 @@ public class ThreadedTree<T> extends GeneralBinaryTree<ThreadedNode<T>> {
             }
         }
         return equal;
-    }
+    }*/
 
 
 

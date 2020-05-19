@@ -31,6 +31,21 @@ public class ThreadedNode<T> extends GeneralBinaryNode<T> {
     public boolean hasNoChildren() {
         return this.predecessor == 0 && this.successor == 0;
     }
+    @Override
+    public boolean checkEquality(T nodeToCompare) {
+        boolean equal = false;
+        if (nodeToCompare != null) {
+            ThreadedNode<T> nodeCompareMod = (ThreadedNode<T>) nodeToCompare;
+            if (nodeCompareMod.getLeft() == this.getLeft()) {
+                if (nodeCompareMod.getRight() == this.getRight()) {
+                    if (nodeCompareMod.getNumber() == this.getNumber()) {
+                        if (nodeCompareMod.getData() == this.getData()) equal = true;
+                    }
+                }
+            }
+        }
+        return equal;
+    }
 
     public void setPredecessor(int predecessor) {
         this.predecessor = predecessor;

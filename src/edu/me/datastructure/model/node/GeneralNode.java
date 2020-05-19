@@ -22,4 +22,7 @@ public abstract class GeneralNode<T> {
     public void setNumber(int number) {
         this.number = number;
     }
+    public boolean contentNotNull() {
+        return this.getData() != null;
+    }
 }
