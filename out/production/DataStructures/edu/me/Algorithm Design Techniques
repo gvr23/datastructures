@@ -1,0 +1,35 @@
+***************BEFORE SOLVING A PROBLEM LOOK FOR SIMILARITIES***************
+
+CLASSIFICATION
+
+    BY DESIGN
+
+        OPTIMIZATION PROBLEMS
+
+             1). Greedy Method
+                    Define: work in stages and in each stage a decision is made until the final solution is reached.
+                    Best Suited: immediate situations
+                    When: We can solve sub problems and build up to the solution.
+                    Advantages: i). is straightforward ii). easily understood iii). simple to code iv). no re examination of solutions.
+                    Disadvantages: i) not a lot of problems are solved this way ii) there is no guarantee
+                    Applications: sorting, priority queues, prim's and kruskal, dijkstra, coin change, knapsack, disjoint sets, job scheduling
+
+             3). Dynamic Programming
+                     Define: There is overlap of sub problems being tied together to get to the next, uses memoization (maintain a table of problems already solved).
+                     When: i). There is overlap ii). optimal structure of solution
+                     Approaches:
+                         i). Bottom Up: SELECT the smallest possible input and step to the rest of possible values.
+                         ii). Top Down: Main problem is broken into sub problems at each step check if pre computed answer exists.
+
+             6). Branch and Bound
+
+    2). Divide and Conquer
+        Define: divide main problem into sub problems (of the same type of problem), use recursion and conquer combining answers.
+        Advantages: i). allows parallelism (multiprocessor execution) ii). memory access (within the cache)
+        Disadvantages: i). overhead
+        Applications: binary search, merge sort, quick sort, median finding, min and max finding, matrix multiplication, closest pair.
+
+    4). Linear Programming
+
+    5). Transform and Conquer
+        Define: goal is to find a reducing problem and transform the actual problem to solve.
