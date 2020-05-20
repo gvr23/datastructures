@@ -23,10 +23,19 @@ public abstract class GeneralBinarySearchNode<T> extends GeneralBinaryNode<T> {
         return equal;
     }
 
-    public void setParent(RedBlackNode<T> parent) {
-        if (this.getNumber() < parent.getNumber()) parent.setLeft(this);
-        else parent.setRight(this);
+    public void setParent(T parent) {
+        GeneralBinarySearchNode<T> parentMod = (GeneralBinarySearchNode<T>) parent;
+        if (this.getNumber() < parentMod.getNumber()) parentMod.setLeft(this);
+        else parentMod.setRight(this);
     }
+    public boolean isParentOf(T child) {
+        GeneralBinarySearchNode<T> childMod = (GeneralBinarySearchNode<T>) child;
+        return childMod.isLeftChild((T) this) || childMod.isRightChild((T) this);
+    }
+    public boolean isLeftChild(T parent) {
+        return this.checkEquality((T) ((GeneralBinarySearchNode<T>) parent).getLeft());
+    }
+    public boolean isRightChild(T parent) { return this.checkEquality((T) ((GeneralBinarySearchNode<T>) parent).getRight()); }
     private boolean determineWildCardEquality(T wildCard) {
         return wildCard.equals(this);
     }

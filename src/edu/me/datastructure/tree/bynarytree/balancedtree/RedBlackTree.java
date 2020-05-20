@@ -3,6 +3,8 @@ package edu.me.datastructure.tree.bynarytree.balancedtree;
 import edu.me.datastructure.model.node.treenode.RedBlackNode;
 import edu.me.datastructure.queue.CircularArrayQueue;
 
+import java.awt.*;
+
 /*Details: Roughly height Balanced
 * Properties:
 *   1. Root always black.
@@ -26,7 +28,7 @@ public class RedBlackTree<T> extends GeneralBalancedTree<RedBlackNode<T>> {
         if (!this.checkIfNull(item)) {
             this.decideNodeColor(item);
             RedBlackNode<T> parent = this.searchCorrectParent(item);
-            item.setParent(parent);
+            item.setParent((T) parent);
             this.executeUntilNoConflict(parent, item);
             this.incrementQuantityByOne();
         } else System.out.println("Item provided is invalid");
@@ -45,7 +47,7 @@ public class RedBlackTree<T> extends GeneralBalancedTree<RedBlackNode<T>> {
         while (isThereRedRedConflict && !parent.checkEquality((T) this.getRoot())) {
             uncle = this.getSibling(parent);
             parent = this.determineUncleSituation(uncle, parent);
-            if (parent.getLeft().getNumber() != child.getNumber()  && parent.getRight().getNumber() != child.getNumber()) {
+            if ((parent.hasLeftChild() && parent.getLeft().getNumber() != child.getNumber())  && (parent.hasRightChild() && parent.getRight().getNumber() != child.getNumber())) {
                 RedBlackNode<T> rightChild = (RedBlackNode<T>) parent.getRight();
                 RedBlackNode<T> leftChild = (RedBlackNode<T>) parent.getLeft();
                 if (!rightChild.isBlack()) child = rightChild;
@@ -57,7 +59,7 @@ public class RedBlackTree<T> extends GeneralBalancedTree<RedBlackNode<T>> {
     private RedBlackNode<T>  getSibling(RedBlackNode<T> parent) {
         RedBlackNode<T> grandFather = this.searchCorrectParent(parent);
         RedBlackNode<T> brother;
-        if (parent.checkEquality((T) grandFather.getLeft())) brother = (RedBlackNode<T>) grandFather.getRight();
+        if (parent.isLeftChild((T) grandFather)) brother = (RedBlackNode<T>) grandFather.getRight();
         else brother = (RedBlackNode<T>) grandFather.getLeft();
 
         return brother;
@@ -114,8 +116,8 @@ public class RedBlackTree<T> extends GeneralBalancedTree<RedBlackNode<T>> {
     }
     @Override
     protected void balanceTree(RedBlackNode<T> evaluatedNode) {
-        if (this.getQuantity() > 2) {
-            int balanceFactor = this.determineBalanceFactor(evaluatedNode, new RedBlackNode<>(null, -5));
+        if (this.getQuantity() >= 2) {
+            int balanceFactor = this.determineBalanceFactor(evaluatedNode, (RedBlackNode<T>) new RedBlackNode<>(-5, -5));
             this.executeBalancingCase(balanceFactor, evaluatedNode);
         }
     }
@@ -139,6 +141,82 @@ public class RedBlackTree<T> extends GeneralBalancedTree<RedBlackNode<T>> {
             this.decrementQuantityByOne();
         }
         return nodeToRemove;
+    }
+
+    @Override
+    protected void executeDeletionCase(RedBlackNode<T> nodeToRemove) {
+        if (this.checkIfRedLeaf(nodeToRemove)) this.removeLeaf(nodeToRemove);
+        else {
+            RedBlackNode<T> remove = nodeToRemove;
+            nodeToRemove.setColor(RedBlackNode.NodeColor.DOUBLEBLACK);
+            RedBlackNode<T> brother = this.getSibling(nodeToRemove);
+            if (!brother.isBlack()) this.redBrotherCase(brother);
+            else if (this.checkIfFamilyIsBlack(brother)) {
+                nodeToRemove.setColor(RedBlackNode.NodeColor.BLACK);
+                this.blackFamilyCase(brother);
+            } else {
+                RedBlackNode<T> parent = this.searchCorrectParent(brother);
+                if (brother.isRightChild((T) parent)) {
+                    RedBlackNode<T> rightChild = (RedBlackNode<T>) brother.getRight();
+                    if (!brother.hasRightChild() || rightChild.isBlack()) {
+                        this.swapColor(brother, rightChild);
+                        this.rightRotation(brother);
+                        //TODO: APPLY LAST CASE
+                    } else {
+                        this.swapColor(parent, brother);
+                        rightChild.setColor(RedBlackNode.NodeColor.BLACK);
+                        this.leftRotation(parent);
+                    }
+                } else {
+                    RedBlackNode<T> leftChild = (RedBlackNode<T>) brother.getLeft();
+                    if (!brother.hasLeftChild() || leftChild.isBlack()) {
+                        this.swapColor(brother, leftChild);
+                        this.leftRotation(brother);
+                        //TODO: APPLY LAST CASE
+                    } else {
+                        this.swapColor(parent, brother);
+                        leftChild.setColor(RedBlackNode.NodeColor.BLACK);
+                        this.rightRotation(parent);
+                    }
+                }
+            }
+            this.removeLeaf(remove);
+        }
+    }
+    private void swapColor(RedBlackNode<T> parent, RedBlackNode<T> child) {
+        RedBlackNode.NodeColor parentColor = parent.getColor();
+        parent.setColor(child.getColor());
+        child.setColor(parentColor);
+    }
+    private void redBrotherCase(RedBlackNode<T> brother) {
+        RedBlackNode<T> parent = this.searchCorrectParent(brother);
+        brother.setColor(RedBlackNode.NodeColor.BLACK);
+        parent.setColor(RedBlackNode.NodeColor.RED);
+        if (brother.isLeftChild((T) parent)) this.rightRotation(parent);
+        else this.leftRotation(parent);
+        //TODO: REAPPLY CASES
+    }
+    private void blackFamilyCase(RedBlackNode<T> brother) {
+        RedBlackNode<T> parent = this.searchCorrectParent(brother);
+        if (parent.isBlack()) parent.setColor(RedBlackNode.NodeColor.DOUBLEBLACK);
+        else parent.setColor(RedBlackNode.NodeColor.BLACK);
+        brother.setColor(RedBlackNode.NodeColor.RED);
+        //TODO: IF DOUBLE BLACK EXIOSIST REAPPLYT CASES
+    }
+    public boolean checkIfFamilyIsBlack(RedBlackNode<T> sibling) {
+        boolean hasBlackFamily = true;
+        if (sibling.isBlack()) {
+            if (!sibling.hasNoChildren()) {
+                RedBlackNode<T> leftChild = (RedBlackNode<T>) sibling.getLeft();
+                RedBlackNode<T> rightChild = (RedBlackNode<T>) sibling.getRight();
+                if (sibling.hasRightChild() && !rightChild.isBlack()) hasBlackFamily = false;
+                if (sibling.hasLeftChild() && !leftChild.isBlack()) hasBlackFamily = false;
+            }
+        } else hasBlackFamily = false;
+        return hasBlackFamily;
+    }
+    private boolean checkIfRedLeaf(RedBlackNode<T> evaluatedNode) {
+        return !evaluatedNode.isBlack() && evaluatedNode.hasNoChildren();
     }
     @Override
     protected void removeWithOneChild(RedBlackNode<T> nodeToRemove) {

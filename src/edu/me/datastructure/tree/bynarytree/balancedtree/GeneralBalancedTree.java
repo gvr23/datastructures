@@ -110,17 +110,19 @@ public abstract class GeneralBalancedTree<T> extends GeneralBinarySearchTree<T> 
         else grandFather.setLeft(parent);
     }
     protected void rightLeftRotation(T evaluatedNode) {
-        GeneralBinaryNode<T> evaluatedNodeMod = (GeneralBinarySearchNode<T>) evaluatedNode;
-        GeneralBinaryNode<T> rightChild = evaluatedNodeMod.getRight();
-        GeneralBinaryNode<T> parent = rightChild.getLeft();
-        GeneralBinaryNode<T> grandFather = (GeneralBinarySearchNode<T>) this.searchCorrectParent(evaluatedNode);
+        GeneralBinarySearchNode<T> evaluatedNodeMod = (GeneralBinarySearchNode<T>) evaluatedNode;
+        GeneralBinarySearchNode<T> rightChild = (GeneralBinarySearchNode<T>) evaluatedNodeMod.getRight();
+        GeneralBinarySearchNode<T> parent = (GeneralBinarySearchNode<T>) rightChild.getLeft();
+        GeneralBinarySearchNode<T> grandFather = (GeneralBinarySearchNode<T>) this.searchCorrectParent(evaluatedNode);
 
         rightChild.setLeft(parent.getRight());
         evaluatedNodeMod.setRight(parent.getLeft());
         parent.setLeft(evaluatedNodeMod);
         parent.setRight(rightChild);
 
-        if (grandFather.getLeft().checkEquality(evaluatedNode)) grandFather.setLeft(parent);
-        else grandFather.setRight(parent);
+        if (!parent.isParentOf(this.getRoot())) {
+            if (evaluatedNodeMod.checkEquality((T) grandFather.getLeft())) grandFather.setLeft(parent);
+            else grandFather.setRight(parent);
+        } else this.setRoot((T) parent);
     }
 }
