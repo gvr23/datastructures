@@ -18,7 +18,7 @@ public class Main {
         RedBlackNode<Integer> m = new RedBlackNode<>(1, 1);
         RedBlackNode<Integer> n = new RedBlackNode<>(70, 70);*/
         RedBlackNode<Integer> c = new RedBlackNode<>(50,  50);
-        RedBlackNode<Integer> b = new RedBlackNode<>(20, 20);
+        RedBlackNode<Integer> b = new RedBlackNode<>(30, 30);
         RedBlackNode<Integer> a = new RedBlackNode<>(65, 65);
         RedBlackNode<Integer> f = new RedBlackNode<>(15, 15);
         RedBlackNode<Integer> j = new RedBlackNode<>(35, 35);
@@ -40,6 +40,35 @@ public class Main {
         btree.insert(k);
         btree.insert(l);
         btree.levelOrderTraversal();
-
+        System.out.println();
+        btree.removeItem(d);
+        btree.levelOrderTraversal();
+        btree.removeItem(b);
+        System.out.println();
+        btree.levelOrderTraversal();
+        btree.removeItem(l);
+        System.out.println();
+        btree.levelOrderTraversal();
+        btree.removeItem(k);
+        System.out.println();
+        btree.levelOrderTraversal();
+        btree.removeItem(c);
+        System.out.println();
+        btree.levelOrderTraversal();
+        btree.removeItem(j);
+        System.out.println();
+        btree.levelOrderTraversal();
+        btree.removeItem(f);
+        System.out.println();
+        btree.levelOrderTraversal();
+        btree.removeItem(a);
+        System.out.println();
+        btree.levelOrderTraversal();
+        btree.removeItem(h);
+        System.out.println();
+        btree.levelOrderTraversal();
+        btree.removeItem(g);
+        System.out.println();
+        btree.levelOrderTraversal();
     }
 }

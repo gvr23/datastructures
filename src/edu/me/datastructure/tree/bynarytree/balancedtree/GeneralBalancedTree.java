@@ -79,7 +79,8 @@ public abstract class GeneralBalancedTree<T> extends GeneralBinarySearchTree<T> 
         if (evaluatedNodeMod.checkEquality(this.getRoot())) this.setRoot((T) parent);
         else {
             GeneralBinaryNode<T> grandFather = (GeneralBinarySearchNode<T>) this.searchCorrectParent(evaluatedNode);
-            grandFather.setRight(parent);
+            if (evaluatedNodeMod.checkEquality(evaluatedNode)) grandFather.setLeft(parent);
+            else grandFather.setRight(parent);
         }
         evaluatedNodeMod.setRight(parent.getLeft());
         parent.setLeft(evaluatedNodeMod);

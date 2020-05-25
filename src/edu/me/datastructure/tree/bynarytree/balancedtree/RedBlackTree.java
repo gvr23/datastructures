@@ -1,5 +1,7 @@
 package edu.me.datastructure.tree.bynarytree.balancedtree;
 
+import edu.me.datastructure.model.node.treenode.GeneralBinaryNode;
+import edu.me.datastructure.model.node.treenode.GeneralBinarySearchNode;
 import edu.me.datastructure.model.node.treenode.RedBlackNode;
 import edu.me.datastructure.queue.CircularArrayQueue;
 
@@ -17,6 +19,7 @@ import java.awt.*;
 
 public class RedBlackTree<T> extends GeneralBalancedTree<RedBlackNode<T>> {
     private RedBlackNode<T> newestNode;
+    private RedBlackNode<T> lastNodeRecolored;
     public RedBlackTree(RedBlackNode<T> root) {
         super(root);
         this.decideNodeColor(root);
@@ -129,7 +132,7 @@ public class RedBlackTree<T> extends GeneralBalancedTree<RedBlackNode<T>> {
             RedBlackNode<T> parent = (RedBlackNode<T>) evaluatedNode.getLeft();
             evaluatedNode.setLeft(parent.getRight());
             parent.setRight(evaluatedNode);
-            grandFather.setLeft(parent);
+            if (evaluatedNode.isLeftChild((T) grandFather)) grandFather.setLeft(parent); else grandFather.setRight(parent);
         }
     }
 
@@ -137,13 +140,243 @@ public class RedBlackTree<T> extends GeneralBalancedTree<RedBlackNode<T>> {
     public RedBlackNode<T> removeItem(RedBlackNode<T> dataToRemove) {
         RedBlackNode<T> nodeToRemove = this.searchForItem(dataToRemove);
         if (!this.checkIfNull(nodeToRemove) && !this.isEmpty()) {
+            this.lastNodeRecolored = nodeToRemove;
             this.executeDeletionCase(nodeToRemove);
+            if (!this.isEmpty() && !this.getRoot().isBlack()) this.getRoot().setColor(RedBlackNode.NodeColor.BLACK);
             this.decrementQuantityByOne();
         }
         return nodeToRemove;
     }
 
     @Override
+    protected void executeDeletionCase(RedBlackNode<T> nodeToRemove) {
+        if (nodeToRemove.hasNoChildren()) this.removeLeaf(nodeToRemove);
+        else this.removeInternalNode(nodeToRemove);
+    }
+
+    private void executeRecoloringCases(RedBlackNode<T> nodeRemoved, RedBlackNode<T> formerParent, RedBlackNode<T> formerBrother) {
+        if (this.checkIfNull(nodeRemoved)) {
+            if (!this.checkIfNull(formerBrother) && formerBrother.isBlack()) this.executeBlackNodeCases(formerParent, formerBrother, nodeRemoved);
+            else this.redBrotherCase(formerParent, formerBrother, nodeRemoved);
+        } else {
+            if (nodeRemoved.isBlack()) nodeRemoved.setColor(RedBlackNode.NodeColor.DOUBLEBLACK);
+            if (formerParent.isBlack()) formerParent.setColor(RedBlackNode.NodeColor.DOUBLEBLACK);
+            boolean doubleBlackExists = formerParent.isDoubleBlack() || nodeRemoved.isDoubleBlack();
+            if (doubleBlackExists) {
+                if (!formerParent.checkEquality((T) this.getRoot())) {
+                    if (this.checkIfNull(nodeRemoved) || nodeRemoved.isBlack() || nodeRemoved.isDoubleBlack()) {
+                        if (this.checkIfNull(formerBrother)) {
+                            formerBrother = this.getSibling(formerParent);
+                            this.executeBlackNodeCases(formerParent, formerBrother, nodeRemoved);
+                        }
+                        else {
+                            if (formerBrother.isBlack()) this.executeBlackNodeCases(formerParent, formerBrother, nodeRemoved);
+                            else this.redBrotherCase(formerParent, formerBrother, nodeRemoved);
+                        }
+                    }
+                } else {
+                   if (nodeRemoved.hasNoChildren()) {
+                       if (nodeRemoved.isLeftChild((T) formerParent)) formerParent.setLeft(null);
+                       else formerParent.setRight(null);
+                   }
+                   nodeRemoved.setColor(RedBlackNode.NodeColor.BLACK);
+                   if (!this.checkIfNull(formerBrother)) {
+                       if (formerBrother.isBlack()) formerBrother.setColor(RedBlackNode.NodeColor.RED);
+                       else formerBrother.setColor(RedBlackNode.NodeColor.BLACK);
+                   }
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void removeLeaf(RedBlackNode<T> nodeToRemove) {
+        RedBlackNode<T> parent;
+        RedBlackNode<T> brother;
+        if (nodeToRemove.isRed()) super.removeLeaf(nodeToRemove);
+        else {
+            parent = this.searchCorrectParent(nodeToRemove);
+            brother = (RedBlackNode<T>) ((nodeToRemove.isLeftChild((T) parent)) ? parent.getRight() : parent.getLeft());
+            if (nodeToRemove.isBlack()) nodeToRemove.setColor(RedBlackNode.NodeColor.DOUBLEBLACK);
+            else {
+                super.removeLeaf(nodeToRemove);
+                nodeToRemove = null;
+            }
+            this.executeRecoloringCases(nodeToRemove, parent, brother);
+        }
+    }
+    @Override
+    protected void transferChildData(RedBlackNode<T> parent, RedBlackNode<T> child) {
+        boolean executed;
+        RedBlackNode<T> brother;
+        if (this.determineIfRightSubTree(child, parent)) {
+            parent.setData(child.getData());
+            if (parent.hasRightChild() && parent.getRight().checkEquality((T) child)) {
+                brother = (RedBlackNode<T>) parent.getLeft();
+                executed = this.executeRedNodeCase(child); // todo: change
+                if (!executed) {
+                    parent.setRight(null);
+                    this.executeRecoloringCases(child, parent, brother);
+                }
+                    /*parent.setRight(child.getRight()); // todo: another change
+                    if (child.hasLeftChild()) {
+                        RedBlackNode<T> leftChild = (RedBlackNode<T>) child.getLeft();
+                        RedBlackNode.NodeColor leftColor = leftChild.getColor();
+                        this.decrementQuantityByOne();
+                        this.insert(leftChild);
+                        leftChild.setColor(leftColor);
+                    }*/
+            }else this.executeDeletionCase(child);
+        }
+        else {
+            parent.setData(child.getData());
+            if (parent.hasLeftChild() && parent.getLeft().checkEquality((T) child)) {
+                brother = (RedBlackNode<T>) parent.getRight();
+                executed = this.executeRedNodeCase(child); // todo: change
+                if (!executed) {
+                    parent.setLeft(null);
+                    this.executeRecoloringCases(null, parent, brother);
+                }
+                    /*parent.setRight(child.getRight()); // todo: another change
+                    if (child.hasLeftChild()) {
+                        RedBlackNode<T> leftChild = (RedBlackNode<T>) child.getLeft();
+                        RedBlackNode.NodeColor leftColor = leftChild.getColor();
+                        this.decrementQuantityByOne();
+                        this.insert(leftChild);
+                        leftChild.setColor(leftColor);
+                    }*/
+            } else this.executeDeletionCase(child);
+           /* parent.setData(child.getData());
+            if (parent.getLeft().checkEquality((T) child)) {
+                executed = this.executeRedNodeCase(child); // todo change
+                if (!executed && !child.hasNoChildren()) {
+                    parent.setLeft(child.getLeft()); // todo: another change
+                    if (child.hasRightChild()) {
+                        RedBlackNode<T> rightChild = (RedBlackNode<T>) child.getLeft();
+                        RedBlackNode.NodeColor rightColor = rightChild.getColor();
+                        this.decrementQuantityByOne();
+                        this.insert(rightChild);
+                        rightChild.setColor(rightColor);
+                    }
+                }
+            } else this.executeDeletionCase(child);*/
+        }
+    }
+
+    /*@Override
+                protected void executeDeletionCase(RedBlackNode<T> nodeToRemove) {
+                    if (!this.executeRedNodeCase(nodeToRemove)) {
+                        RedBlackNode<T> parent = this.searchCorrectParent(nodeToRemove);
+                        RedBlackNode<T> brother = this.getSibling(nodeToRemove);
+                        if (!this.executeBlackNodeCases(parent, brother, nodeToRemove)) this.redBrotherCase(parent, brother, nodeToRemove);
+                        else nodeToRemove.setColor(RedBlackNode.NodeColor.BLACK);
+                    }
+                }*/
+    private boolean executeRedNodeCase(RedBlackNode<T> evaluatedNode) {
+        boolean executed = false;
+        if (evaluatedNode.isRed()) {
+            if (!evaluatedNode.hasNoChildren()) {
+                this.removeInternalNode(evaluatedNode);
+            } else this.removeLeaf(evaluatedNode);
+            executed = true;
+        }
+        return executed;
+    }
+    private boolean executeBlackNodeCases(RedBlackNode<T> parent, RedBlackNode<T> brother, RedBlackNode<T> doubleBlackChild) {
+        boolean execute = false;
+        if (!this.checkIfNull(brother)) {
+            execute = true;
+            RedBlackNode<T> rightChild = (RedBlackNode<T>) brother.getRight();
+            RedBlackNode<T> leftChild = (RedBlackNode<T>) brother.getLeft();
+
+            if (this.checkIfFamilyIsBlack(brother)) this.blackFamilyCase(parent, brother);
+            else {
+                if (this.determineIfRightSubTree(brother, parent)) {
+                    if (rightChild.isBlack()) {
+                        if (leftChild.isRed()) this.blackBrotherNearRedNephewCase(brother, leftChild);
+                        else {
+                            RedBlackNode<T> doubleBlackNode = (RedBlackNode<T>) parent.getLeft();
+                            this.blackBrotherRedFarNephewCase(brother, doubleBlackNode);
+                        }
+                    }
+                } else {
+                   if (!this.checkIfNull(leftChild)) {
+                       if (leftChild.isBlack()) {
+                           if (rightChild.isRed()) this.blackBrotherNearRedNephewCase(brother, rightChild);
+                           else {
+                               RedBlackNode<T> doubleBlackNode = (RedBlackNode<T>) parent.getRight();
+                               this.blackBrotherRedFarNephewCase(brother, doubleBlackNode);
+                           }
+                       }
+                   } else this.blackBrotherNearRedNephewCase(brother, rightChild);
+                }
+
+            }
+        } else this.redBrotherCase(parent, brother, doubleBlackChild);
+        return execute;
+    }
+    private void blackFamilyCase(RedBlackNode<T> parent, RedBlackNode<T> brother) {
+        if (parent.isBlack()) parent.setColor(RedBlackNode.NodeColor.DOUBLEBLACK);
+        else parent.setColor(RedBlackNode.NodeColor.BLACK);
+        brother.setColor(RedBlackNode.NodeColor.RED);
+        if (parent.getColor().equals(RedBlackNode.NodeColor.DOUBLEBLACK)) {
+            RedBlackNode<T> grandFather = this.searchCorrectParent(parent);
+            RedBlackNode<T> uncle = (RedBlackNode<T>) ((parent.isLeftChild((T) grandFather)) ? grandFather.getRight() : grandFather.getLeft());
+            this.lastNodeRecolored = parent;
+            this.executeRecoloringCases(parent, grandFather, uncle);
+        }
+    }
+    private void blackBrotherNearRedNephewCase(RedBlackNode<T> brother, RedBlackNode<T> child) {
+        RedBlackNode<T> doubleBlackUncle;
+        this.swapColor(brother, child);
+        doubleBlackUncle = this.rotateAwayAndReturnUncle(brother, child);
+        this.blackBrotherRedFarNephewCase(child, doubleBlackUncle);
+    }
+    private RedBlackNode<T> rotateAwayAndReturnUncle(RedBlackNode<T> parent, RedBlackNode<T> child) {
+        RedBlackNode<T> grandFarther = this.searchCorrectParent(parent);
+        RedBlackNode<T> doubleBlackUncle;
+        if (child.isLeftChild((T) parent)) {
+            doubleBlackUncle = (RedBlackNode<T>) grandFarther.getLeft();
+            this.rightRotation(parent);
+        }
+        else {
+            doubleBlackUncle = (RedBlackNode<T>) grandFarther.getRight();
+            this.leftRotation(parent);
+        }
+        return doubleBlackUncle;
+    }
+    private void blackBrotherRedFarNephewCase(RedBlackNode<T> brother, RedBlackNode<T> doubleBlackChild) {
+        RedBlackNode<T> nephew;
+        RedBlackNode<T> parent = this.searchCorrectParent(brother);
+        this.swapColor(parent, brother);
+        nephew = this.rotateAndReturnRedNephew(parent, doubleBlackChild, brother);
+        if (doubleBlackChild.isLeftChild((T) parent)) parent.setLeft(null); else parent.setRight(null);
+//        doubleBlackChild.setColor(RedBlackNode.NodeColor.BLACK);
+        nephew.setColor(RedBlackNode.NodeColor.BLACK);
+    }
+    private RedBlackNode<T> rotateAndReturnRedNephew(RedBlackNode<T> parent, RedBlackNode<T> child, RedBlackNode<T> brother) {
+        RedBlackNode<T> nephew;
+        if (child.isLeftChild((T) parent)) {
+            nephew = (RedBlackNode<T>) brother.getRight();
+            this.leftRotation(parent);
+        } else {
+            nephew = (RedBlackNode<T>) brother.getLeft();
+            this.rightRotation(parent);
+        }
+        return nephew;
+    }
+    @Override
+    protected void dequeAndInsertChildren(CircularArrayQueue<RedBlackNode<T>> auxQueue) {
+        RedBlackNode<T> current = auxQueue.deque();
+        current.printData();
+        System.out.print(" <-- ");
+        if (!current.hasNoChildren()) {
+            if (current.hasLeftChild()) auxQueue.enqueue((RedBlackNode<T>) current.getLeft());
+            if (current.hasRightChild()) auxQueue.enqueue((RedBlackNode<T>) current.getRight());
+        }
+    }
+
+/*    @Override
     protected void executeDeletionCase(RedBlackNode<T> nodeToRemove) {
         if (this.checkIfRedLeaf(nodeToRemove)) this.removeLeaf(nodeToRemove);
         else {
@@ -182,27 +415,37 @@ public class RedBlackTree<T> extends GeneralBalancedTree<RedBlackNode<T>> {
             }
             this.removeLeaf(remove);
         }
+    }*/
+    private void redBrotherCase(RedBlackNode<T> parent, RedBlackNode<T> brother, RedBlackNode<T> doubleBlackChild) {
+        this.swapColor(parent, brother);
+        this.rotateToDoubleBlack(parent, brother);
+        if (!this.checkIfNull(doubleBlackChild) && parent.isParentOf((T) doubleBlackChild))this.executeDeletionCase(doubleBlackChild);
     }
     private void swapColor(RedBlackNode<T> parent, RedBlackNode<T> child) {
-        RedBlackNode.NodeColor parentColor = parent.getColor();
-        parent.setColor(child.getColor());
-        child.setColor(parentColor);
+        if (!this.checkIfNull(parent) && !this.checkIfNull(child)) {
+            RedBlackNode.NodeColor parentColor = parent.getColor();
+            if (!parent.checkEquality((T) this.getRoot())) parent.setColor(child.getColor());
+            child.setColor(parentColor);
+        }
     }
-    private void redBrotherCase(RedBlackNode<T> brother) {
-        RedBlackNode<T> parent = this.searchCorrectParent(brother);
-        brother.setColor(RedBlackNode.NodeColor.BLACK);
-        parent.setColor(RedBlackNode.NodeColor.RED);
+    private void rotateToDoubleBlack(RedBlackNode<T> parent, RedBlackNode<T> brother) {
         if (brother.isLeftChild((T) parent)) this.rightRotation(parent);
         else this.leftRotation(parent);
-        //TODO: REAPPLY CASES
     }
-    private void blackFamilyCase(RedBlackNode<T> brother) {
-        RedBlackNode<T> parent = this.searchCorrectParent(brother);
-        if (parent.isBlack()) parent.setColor(RedBlackNode.NodeColor.DOUBLEBLACK);
-        else parent.setColor(RedBlackNode.NodeColor.BLACK);
-        brother.setColor(RedBlackNode.NodeColor.RED);
-        //TODO: IF DOUBLE BLACK EXIOSIST REAPPLYT CASES
+
+    @Override
+    protected void leftRotation(RedBlackNode<T> evaluatedNode) {
+        GeneralBinaryNode<T> parent = evaluatedNode.getRight();
+        if (evaluatedNode.checkEquality((T) this.getRoot())) this.setRoot((RedBlackNode<T>) parent);
+        else {
+            GeneralBinaryNode<T> grandFather = this.searchCorrectParent(evaluatedNode);
+            if (evaluatedNode.isLeftChild((T) grandFather)) grandFather.setLeft(parent);
+            else grandFather.setRight(parent);
+        }
+        evaluatedNode.setRight(parent.getLeft());
+        parent.setLeft(evaluatedNode);
     }
+
     public boolean checkIfFamilyIsBlack(RedBlackNode<T> sibling) {
         boolean hasBlackFamily = true;
         if (sibling.isBlack()) {
@@ -214,27 +457,5 @@ public class RedBlackTree<T> extends GeneralBalancedTree<RedBlackNode<T>> {
             }
         } else hasBlackFamily = false;
         return hasBlackFamily;
-    }
-    private boolean checkIfRedLeaf(RedBlackNode<T> evaluatedNode) {
-        return !evaluatedNode.isBlack() && evaluatedNode.hasNoChildren();
-    }
-    @Override
-    protected void removeWithOneChild(RedBlackNode<T> nodeToRemove) {
-        super.removeWithOneChild(nodeToRemove);
-    }
-    @Override
-    protected void removeInternalNode(RedBlackNode<T> nodeToRemove) {
-        super.removeInternalNode(nodeToRemove);
-    }
-
-    @Override
-    protected void dequeAndInsertChildren(CircularArrayQueue<RedBlackNode<T>> auxQueue) {
-        RedBlackNode<T> current = auxQueue.deque();
-        current.printData();
-        System.out.print(" <-- ");
-        if (!current.hasNoChildren()) {
-            if (current.hasLeftChild()) auxQueue.enqueue((RedBlackNode<T>) current.getLeft());
-            if (current.hasRightChild()) auxQueue.enqueue((RedBlackNode<T>) current.getRight());
-        }
     }
 }
