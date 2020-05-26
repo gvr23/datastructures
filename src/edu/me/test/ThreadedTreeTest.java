@@ -23,7 +23,7 @@ class ThreadedTreeTest {
     @BeforeAll
     static void beforeAll() {
         try {
-            System.out.println("Prepare to initialize");
+            System.out.println("THREADED TREE Prepare to initialize");
             bTree = new ThreadedTree<>(new ThreadedNode<>(11, 11), new ThreadedNode<>(-1, -1));
             System.out.println("Successfully ended Initialization");
         } catch (Exception e) {

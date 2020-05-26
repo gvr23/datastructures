@@ -39,7 +39,7 @@ class RedBlackTreeTest {
     @BeforeAll
     static void setUp() {
         try {
-            System.out.println("Prepare to initialize");
+            System.out.println("REDBLACK TREE Prepare to initialize");
             nodesArrayList = new ArrayList<>();
             nodesToRemoveList = new ArrayList<>();
             rbTree = new RedBlackTree<>(nodesList.get(1));
@@ -79,7 +79,7 @@ class RedBlackTreeTest {
         int prevQuantity = rbTree.getQuantity();
         RedBlackNode<Integer> notInsertedNode = null;
         try {
-            for (RedBlackNode<Integer> node : this.nodesArrayList) {
+            for (RedBlackNode<Integer> node : nodesArrayList) {
                 notInsertedNode = node;
                 rbTree.insert(node);
                 if (rbTree.getQuantity() != (prevQuantity + 1)) break;
