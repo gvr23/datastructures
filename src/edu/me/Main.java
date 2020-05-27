@@ -5,7 +5,7 @@ import edu.me.datastructure.tree.bynarytree.balancedtree.RedBlackTree;
 
 public class Main {
     public static void main(String[] args) {
-        RedBlackNode<Integer> c = new RedBlackNode<>(10,  10);
+        /*RedBlackNode<Integer> c = new RedBlackNode<>(10,  10);
         RedBlackNode<Integer> b = new RedBlackNode<>(18, 18);
         RedBlackNode<Integer> a = new RedBlackNode<>(7, 7);
         RedBlackNode<Integer> f = new RedBlackNode<>(15, 15);
@@ -16,20 +16,59 @@ public class Main {
         RedBlackNode<Integer> k = new RedBlackNode<>(60, 60);
         RedBlackNode<Integer> l = new RedBlackNode<>(2, 2);
         RedBlackNode<Integer> m = new RedBlackNode<>(1, 1);
-        RedBlackNode<Integer> n = new RedBlackNode<>(70, 70);
+        RedBlackNode<Integer> n = new RedBlackNode<>(70, 70);*/
+        RedBlackNode<Integer> c = new RedBlackNode<>(50,  50);
+        RedBlackNode<Integer> b = new RedBlackNode<>(30, 30);
+        RedBlackNode<Integer> a = new RedBlackNode<>(65, 65);
+        RedBlackNode<Integer> f = new RedBlackNode<>(15, 15);
+        RedBlackNode<Integer> j = new RedBlackNode<>(35, 35);
+        RedBlackNode<Integer> d = new RedBlackNode<>(55, 55);
+        RedBlackNode<Integer> g = new RedBlackNode<>(70, 70);
+        RedBlackNode<Integer> h = new RedBlackNode<>(68, 68);
+        RedBlackNode<Integer> k = new RedBlackNode<>(80, 80);
+        RedBlackNode<Integer> l = new RedBlackNode<>(90, 90);
+//        55, 30, 90, 80, 50, 35, 15
 
-        RedBlackTree<Integer> btree = new RedBlackTree<>(c);
-        btree.insert(b);
+        RedBlackTree<Integer> btree = new RedBlackTree<>(b);
         btree.insert(a);
         btree.insert(f);
         btree.insert(j);
+        btree.insert(c);
         btree.insert(d);
         btree.insert(g);
         btree.insert(h);
         btree.insert(k);
         btree.insert(l);
-        btree.insert(m);
-        btree.insert(n);
+        btree.levelOrderTraversal();
+        System.out.println();
+        btree.removeItem(d);
+        btree.levelOrderTraversal();
+        btree.removeItem(b);
+        System.out.println();
+        btree.levelOrderTraversal();
+        btree.removeItem(l);
+        System.out.println();
+        btree.levelOrderTraversal();
+        btree.removeItem(k);
+        System.out.println();
+        btree.levelOrderTraversal();
+        btree.removeItem(c);
+        System.out.println();
+        btree.levelOrderTraversal();
+        btree.removeItem(j);
+        System.out.println();
+        btree.levelOrderTraversal();
+        btree.removeItem(f);
+        System.out.println();
+        btree.levelOrderTraversal();
+        btree.removeItem(a);
+        System.out.println();
+        btree.levelOrderTraversal();
+        btree.removeItem(h);
+        System.out.println();
+        btree.levelOrderTraversal();
+        btree.removeItem(g);
+        System.out.println();
         btree.levelOrderTraversal();
     }
 }
