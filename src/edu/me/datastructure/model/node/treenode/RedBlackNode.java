@@ -13,6 +13,8 @@ public class RedBlackNode<T> extends GeneralBinarySearchNode<T> {
     }
 
     public boolean isBlack() { return this.color.equals(NodeColor.BLACK); }
+    public boolean isRed() { return this.color.equals(NodeColor.RED); }
+    public boolean isDoubleBlack() { return this.color.equals(NodeColor.DOUBLEBLACK); }
 
     public void reColor() {
         if (this.isBlack()) this.color = NodeColor.RED;

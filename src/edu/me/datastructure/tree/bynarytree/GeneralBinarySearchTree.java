@@ -38,8 +38,8 @@ public  abstract class GeneralBinarySearchTree<T> extends GeneralBinaryTree<T> {
 
     @Override
     protected void removeLeaf(T nodeToRemove) {
-        GeneralBinarySearchNode<Integer> parent = (GeneralBinarySearchNode<Integer>) this.getParentFromLeaf(nodeToRemove);
-        if (parent.getRight().checkEquality((Integer) nodeToRemove)) parent.setRight(null);
+        GeneralBinarySearchNode<T> parent = (GeneralBinarySearchNode<T>) this.getParentFromLeaf(nodeToRemove);
+        if (parent.hasRightChild() && parent.getRight().checkEquality(nodeToRemove)) parent.setRight(null);
         else parent.setLeft(null);
     }
     @Override
@@ -88,8 +88,8 @@ public  abstract class GeneralBinarySearchTree<T> extends GeneralBinaryTree<T> {
     }
 
     @Override
-    protected boolean determineIfRightSubTree(T nodeToRemove, T root) {
-        return  ((GeneralBinaryNode<Integer>) nodeToRemove).getData() > ((GeneralBinaryNode<Integer>) root).getData();
+    protected boolean determineIfRightSubTree(T child, T parent) {
+        return  ((GeneralBinaryNode<T>) child).getNumber() > ((GeneralBinaryNode<T>) parent).getNumber();
     }
 
     @Override
