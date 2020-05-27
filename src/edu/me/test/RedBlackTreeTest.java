@@ -6,21 +6,21 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
-class RedBlackTreeTest {
+class RedBlackTreeTest<T> {
     private static RedBlackTree<Integer> rbTree;
     private static final List<RedBlackNode<Integer>> nodesList = new ArrayList<>() {{
-        //        add(new RedBlackNode<>(10, 10));
-//        add(new RedBlackNode<>(18, 18));
-//        add(new RedBlackNode<>(7, 7));
-//        add(new RedBlackNode<>(15, 15));
-//        add(new RedBlackNode<>(16, 16));
-//        add(new RedBlackNode<>(30, 30));
-//        add(new RedBlackNode<>(25, 25));
-//        add(new RedBlackNode<>(40, 40));
-//        add(new RedBlackNode<>(60, 60));
-//        add(new RedBlackNode<>(2, 2));
-//        add(new RedBlackNode<>(1, 1));
-//        add(new RedBlackNode<>(70, 70));
+/*        add(new RedBlackNode<>(10, 10));
+        add(new RedBlackNode<>(18, 18));
+        add(new RedBlackNode<>(7, 7));
+        add(new RedBlackNode<>(15, 15));
+        add(new RedBlackNode<>(16, 16));
+        add(new RedBlackNode<>(30, 30));
+        add(new RedBlackNode<>(25, 25));
+        add(new RedBlackNode<>(40, 40));
+        add(new RedBlackNode<>(60, 60));
+        add(new RedBlackNode<>(2, 2));
+        add(new RedBlackNode<>(1, 1));
+        add(new RedBlackNode<>(70, 70));*/
 
         add(new RedBlackNode<>(50, 50));
         add(new RedBlackNode<>(30, 30));
@@ -94,21 +94,24 @@ class RedBlackTreeTest {
     @Test
     void removeItem() {
         int prevQuantity = rbTree.getQuantity();
-        RedBlackNode<Integer> nodeRemoved = null;
+        RedBlackNode<Integer> nodeCopy;
+        Integer dataCopy = null;
 
         try {
             rbTree.levelOrderTraversal();
             System.out.println();
             while (!nodesToRemoveList.isEmpty()) {
-                nodeRemoved = rbTree.removeItem(nodesToRemoveList.remove(0));
+                nodeCopy = nodesToRemoveList.remove(0);
+                dataCopy = nodeCopy.getData();
+                rbTree.removeItem(nodeCopy);
                 if (rbTree.getQuantity() != (prevQuantity - 1)) break;
                 prevQuantity = rbTree.getQuantity();
-                System.out.println(String.format("Test, node removed is %s", nodeRemoved.getData()));
+                System.out.println(String.format("Test, node removed is %s", dataCopy));
                 rbTree.levelOrderTraversal();
             }
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println(String.format("Error removing the %d node", nodeRemoved.getData()));
+            System.out.println(String.format("Error removing the %d node", dataCopy));
         }
     }
 
