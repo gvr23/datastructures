@@ -1,34 +1,34 @@
 import edu.me.datastructure.hashtable.CollisionMethod;
 import edu.me.datastructure.hashtable.HashTable;
 import edu.me.datastructure.hashtable.HashingMethod;
+import edu.me.datastructure.linkedlist.SinglyLinkedList;
+import edu.me.datastructure.model.node.HashNode;
 import edu.me.datastructure.model.node.linkedlistnode.SinglyLinkedListNode;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 class HashTableTest {
-    static HashTable<SinglyLinkedListNode> openHashTable;
-    private static final ArrayList<SinglyLinkedListNode> dataList = new ArrayList<>(); {{
+    private final float LOAD_FACTOR = 0.75f;
+    private final ArrayList<SinglyLinkedListNode> dataList = new ArrayList<>();
+    private HashTable openHashTable;
 
-    }};
-
-    @BeforeAll
-    static void setUp() {
+    @BeforeEach
+    void setUp() {
         try {
             System.out.println("Hash table prepare to initialize");
 
-            dataList.add(new SinglyLinkedListNode(3));
-            dataList.add(new SinglyLinkedListNode(2));
-            dataList.add(new SinglyLinkedListNode(9));
-            dataList.add(new SinglyLinkedListNode(6));
-            dataList.add(new SinglyLinkedListNode(11));
-            dataList.add(new SinglyLinkedListNode(13));
-            dataList.add(new SinglyLinkedListNode(7));
-            dataList.add(new SinglyLinkedListNode(12));
+            this.dataList.add(new SinglyLinkedListNode(3));
+            this.dataList.add(new SinglyLinkedListNode(2));
+            this.dataList.add(new SinglyLinkedListNode(9));
+            this.dataList.add(new SinglyLinkedListNode(6));
+            this.dataList.add(new SinglyLinkedListNode(11));
+            this.dataList.add(new SinglyLinkedListNode(13));
+            this.dataList.add(new SinglyLinkedListNode(7));
+            this.dataList.add(new SinglyLinkedListNode(12));
 
-            openHashTable = new HashTable<>(10, HashingMethod.HashingTechnique.DIVISION, CollisionMethod.CollisionTechnique.CHAINING, 0.75f);
+
             System.out.println("Finished successfully the hash initialization");
         } catch (Exception e) {
             e.printStackTrace();
@@ -37,15 +37,57 @@ class HashTableTest {
     }
 
     @Test
-    void insert() {
+    void insertChaining() {
+        HashNode surrogateNode;
+        SinglyLinkedList surrogateList;
+        this.openHashTable = new HashTable(10, HashingMethod.HashingTechnique.DIVISION, CollisionMethod.CollisionTechnique.CHAINING, LOAD_FACTOR);
         for (SinglyLinkedListNode node : dataList) {
-            openHashTable.insert(node);
+            surrogateList = new SinglyLinkedList(node);
+            surrogateNode = new HashNode(surrogateList);
+            surrogateNode.setNumericRepresentation((Integer) node.getData());
+            openHashTable.insert(surrogateNode);
         }
-        System.out.println("finished inserting");
+        System.out.println("finished inserting with chaining");
     }
 
-    @AfterAll
-    static void tearDown() {
-        openHashTable = null;
+    @Test
+    void insertLinearProbing() {
+        HashNode surrogateNode;
+        this.openHashTable = new HashTable(10, HashingMethod.HashingTechnique.DIVISION, CollisionMethod.CollisionTechnique.LINEAR_PROBING, LOAD_FACTOR);
+        for (SinglyLinkedListNode node : dataList) {
+            surrogateNode = new HashNode(node);
+            surrogateNode.setNumericRepresentation((Integer) node.getData());
+            openHashTable.insert(surrogateNode);
+        }
+        System.out.println("finished inserting with linear probing");
+        for (HashNode node : this.openHashTable.getHashTable()) {
+            int itemToPrint = (node == null) ? 0 : (int) ((SinglyLinkedListNode) node.getContent()).getData();
+            System.out.print(String.format(" <-- %s", itemToPrint));
+        }
+        System.out.println();
+        System.out.println("Finished printing with linear probing");
+    }
+
+    @Test
+    void insertingQuadraticProbing() {
+        HashNode surrogateNode;
+        this.openHashTable = new HashTable(10, HashingMethod.HashingTechnique.DIVISION, CollisionMethod.CollisionTechnique.QUADRATIC_PROBING, LOAD_FACTOR);
+        for (SinglyLinkedListNode node : dataList) {
+            surrogateNode = new HashNode(node);
+            surrogateNode.setNumericRepresentation((Integer) node.getData());
+            openHashTable.insert(surrogateNode);
+        }
+        System.out.println("Finished inserting with quadratic probing");
+        for (HashNode node : this.openHashTable.getHashTable()) {
+            int itemToPrint = (node == null) ? 0 : (int) ((SinglyLinkedListNode) node.getContent()).getData();
+            System.out.print(String.format(" <-- %s", itemToPrint));
+        }
+        System.out.println();
+        System.out.println("Finished printing with quadratic probing");
+    }
+
+    @AfterEach
+    void tearDown() {
+        this.openHashTable = null;
     }
 }

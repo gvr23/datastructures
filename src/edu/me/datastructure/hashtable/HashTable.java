@@ -9,7 +9,7 @@ import edu.me.utils.Helper;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 
-public class HashTable<T> {
+public class HashTable {
     private final float LOAD_FACTOR;
     private final HashingMethod.HashingTechnique hMethod;
     private final CollisionMethod.CollisionTechnique cTechnique;
@@ -35,7 +35,7 @@ public class HashTable<T> {
     }
     public HashNode[] getHashTable() { return hashTable; }
 
-    public void insert(T item) {
+    public void insert(HashNode item) {
         switch (this.hMethod) {
             case DIVISION:
                 this.insertByDivision(item);
@@ -50,68 +50,83 @@ public class HashTable<T> {
         if (this.isRehashingNeeded() && !cTechnique.equals(CollisionMethod.CollisionTechnique.CHAINING)) this.resize();
     }
 
-    private void insertByDivision(T item) {
-        switch (this.cTechnique) {
-            case CHAINING:
-                this.insertByDivisionAndChaining(item);
-                break;
-            case LINEAR_PROBING:
-                this.insertByDivisionAndLinearProbing(item);
-                break;
-            case QUADRATIC_PROBING:
-                this.insertByDivisionAndQuadraticProbing(item);
-                break;
-            case DOUBLE_HASHING:
-                this.insertByDivisionAndDoubleHashing(item);
-                break;
-        }
-        this.quantity++;
-    }
-    private void insertByDivisionAndChaining(Object item) {
-        SinglyLinkedListNode newNode = new SinglyLinkedListNode(((SinglyLinkedListNode) item).getData());
-        int hashingResult = this.firstLevelHashing((Integer) newNode.getData());
+    private void insertByDivision(HashNode item) {
+        int hashingResult = this.firstLevelHashing(item.getNumericRepresentation());
         int hashingMethodIndex = HashingMethod.getIndexByDivisionHashing(hashingResult, this.capacity);
 
-        if (!this.isInsertedFirstTry(new SinglyLinkedList(newNode), hashingMethodIndex)) {
-            HashNode hashNode = this.hashTable[hashingMethodIndex];
-            ((SinglyLinkedList) hashNode.getContent()).insertAtEnd(newNode);
+        if (!this.isInserted(item, hashingMethodIndex)) {
+            switch (this.cTechnique) {
+                case CHAINING:
+                    this.chainingCollision(item, hashingMethodIndex);
+                    break;
+                case LINEAR_PROBING:
+                    this.insertByDivisionAndLinearProbing(item, hashingMethodIndex);
+                    break;
+                case QUADRATIC_PROBING:
+                    this.insertByDivisionAndQuadraticProbing(item, hashingMethodIndex);
+                    break;
+                case DOUBLE_HASHING:
+                    this.insertByDivisionAndDoubleHashing(item);
+                    break;
+            }
         }
+
+        this.quantity++;
     }
-    private boolean isInsertedFirstTry(Object item, int index) {
+    private boolean isInserted(HashNode item, int index) {
         boolean inserted = false;
         if (!this.collisionExists(index)) {
-            this.hashTable[index] = new HashNode(item);
+            this.hashTable[index] = item;
             inserted = true;
         }
         return inserted;
     }
-    private void insertByDivisionAndLinearProbing(T item) {
+    private void chainingCollision(HashNode item, int index) {
+        SinglyLinkedListNode newNode = ((SinglyLinkedList) item.getContent()).removeAtBeginning();
+        if (this.hashTable[index].getContent() instanceof SinglyLinkedList) {
+            SinglyLinkedList hashList = (SinglyLinkedList) this.hashTable[index].getContent();
+            hashList.insertAtEnd(newNode);
+        }
+    }
+    private void insertByDivisionAndLinearProbing(HashNode item, int collidedIndex) {
+        int probes = 0;
+        int indexToInsertAttempt = collidedIndex;
+        while (probes < this.hashTable.length && !this.isInserted(item, indexToInsertAttempt)) {
+            probes++;
+            indexToInsertAttempt = CollisionMethod.linearProbingDivisionIndex(collidedIndex, probes, this.capacity);
+        }
+        item.setProbes(probes);
+    }
+    private void insertByDivisionAndQuadraticProbing(HashNode item, int collidedIndex) {
+        int probes = 0;
+        int indexToInsertAttempt = collidedIndex;
+        while (probes < this.hashTable.length && !this.isInserted(item, indexToInsertAttempt)) {
+            probes++;
+            indexToInsertAttempt = CollisionMethod.quadraticProbingDivisionIndex(collidedIndex, probes, this.capacity);
+        }
+        item.setProbes(probes);
+    }
+    private void insertByDivisionAndDoubleHashing(HashNode item) {
 
     }
-    private void insertByDivisionAndQuadraticProbing(T item) {
+
+    private void insertByFolding(HashNode item) {
 
     }
-    private void insertByDivisionAndDoubleHashing(T item) {
+    private void insertByFoldingAndChaining(HashNode item) {
 
     }
-
-    private void insertByFolding(T item) {
-
-    }
-    private void insertByFoldingAndChaining(T item) {
+    private void insertByFoldingAndLinearProbing(HashNode item) {
 
     }
-    private void insertByFoldingAndLinearProbing(T item) {
+    private void insertByFoldingAndQuadraticProbing(HashNode item) {
 
     }
-    private void insertByFoldingAndQuadraticProbing(T item) {
-
-    }
-    private void insertByFoldingAndDoubleHashing(T item) {
+    private void insertByFoldingAndDoubleHashing(HashNode item) {
 
     }
 
-    private void insertByModulusMultiplication(T item) {
+    private void insertByModulusMultiplication(HashNode item) {
 
     }
     private void insertByModMultAndChaining() {
@@ -127,11 +142,11 @@ public class HashTable<T> {
 
     }
 
-    public T remove(T item) {
+    public HashNode remove(HashNode item) {
         return item;
     }
 
-    public T search(T item) {
+    public HashNode search(HashNode item) {
         return item;
     }
 

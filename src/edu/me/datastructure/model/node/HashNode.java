@@ -1,8 +1,9 @@
 package edu.me.datastructure.model.node;
 
 public class HashNode {
-    private final Object content;
+    private Object content;
     private int probes;
+    private int numericRepresentation;
 
     public HashNode(Object content) {
         this.content = content;
@@ -15,8 +16,17 @@ public class HashNode {
     public int getProbes() {
         return probes;
     }
+    public int getNumericRepresentation() {
+        return numericRepresentation;
+    }
 
+    public void setContent(Object content) {
+        this.content = content;
+    }
     public void setProbes(int probes) {
         this.probes = probes;
+    }
+    public void setNumericRepresentation(int numericRepresentation) {
+        this.numericRepresentation = numericRepresentation;
     }
 }

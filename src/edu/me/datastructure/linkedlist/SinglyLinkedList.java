@@ -9,6 +9,8 @@ public class SinglyLinkedList extends GeneralLinkedList<SinglyLinkedListNode> {
         super(node);
     }
 
+
+
     @Override
     public void insertAtBeginning(SinglyLinkedListNode newNode) {
         if (this.isEmpty()) reInit(newNode);

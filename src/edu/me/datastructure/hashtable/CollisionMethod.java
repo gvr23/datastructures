@@ -11,11 +11,11 @@ public abstract class CollisionMethod {
 
 
     public static int linearProbingDivisionIndex(int collidedLocation, int currentPosition, int capacity) {
-        return (collidedLocation * currentPosition) % capacity;
+        return (collidedLocation + currentPosition) % capacity;
     }
 
     public static int quadraticProbingDivisionIndex(int collidedLocation, int currentPosition, int capacity) {
-        return (collidedLocation + currentPosition^2) % capacity;
+        return (int) ((collidedLocation + Math.pow(currentPosition, 2)) % capacity);
     }
 
     public static int doubleHashingDivisionIndex(int collidedLocation, int secondLevelHashingResult, int currentPosition, int capacity) {
