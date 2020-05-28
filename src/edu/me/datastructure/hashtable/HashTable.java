@@ -4,9 +4,10 @@ package edu.me.datastructure.hashtable;
 import edu.me.datastructure.linkedlist.SinglyLinkedList;
 import edu.me.datastructure.model.node.HashNode;
 import edu.me.datastructure.model.node.linkedlistnode.SinglyLinkedListNode;
+import edu.me.utils.Helper;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.lang.ref.WeakReference;
+import java.util.Arrays;
 
 public class HashTable<T> {
     private final float LOAD_FACTOR;
@@ -14,7 +15,7 @@ public class HashTable<T> {
     private final CollisionMethod.CollisionTechnique cTechnique;
     private int capacity;
     private int quantity;
-    private final HashNode[] hashTable;
+    private HashNode[] hashTable;
 
 
     public HashTable(int capacity, HashingMethod.HashingTechnique hMethod, CollisionMethod.CollisionTechnique cTechnique, float loadFactor) {
@@ -46,7 +47,7 @@ public class HashTable<T> {
                 this.insertByModulusMultiplication(item);
                 break;
         }
-//        if (this.isRehashingNeeded()) this.capacity *= 2;
+        if (this.isRehashingNeeded() && !cTechnique.equals(CollisionMethod.CollisionTechnique.CHAINING)) this.resize();
     }
 
     private void insertByDivision(T item) {
@@ -64,21 +65,25 @@ public class HashTable<T> {
                 this.insertByDivisionAndDoubleHashing(item);
                 break;
         }
-    }
-    private void insertByDivisionAndChaining(T item) {
-        HashNode hashNode;
-        SinglyLinkedListNode<Integer> newNode = new SinglyLinkedListNode<>(((SinglyLinkedListNode<Integer>) item).getData());
-        int firstLevelHashingResult = this.firstLevelHashing(newNode.getData());
-        int firstLevelIndex = HashingMethod.getIndexByDivisionHashing(firstLevelHashingResult, this.capacity);
-
-        if (this.collisionExists(firstLevelIndex)) {
-            hashNode = this.hashTable[firstLevelIndex];
-            ((SinglyLinkedList<T>) hashNode.getContent()).insertAtEnd((SinglyLinkedListNode<T>) newNode);
-        } else {
-            hashNode = new HashNode(new SinglyLinkedList<>(newNode));
-            this.hashTable[firstLevelIndex] = hashNode;
-        }
         this.quantity++;
+    }
+    private void insertByDivisionAndChaining(Object item) {
+        SinglyLinkedListNode newNode = new SinglyLinkedListNode(((SinglyLinkedListNode) item).getData());
+        int hashingResult = this.firstLevelHashing((Integer) newNode.getData());
+        int hashingMethodIndex = HashingMethod.getIndexByDivisionHashing(hashingResult, this.capacity);
+
+        if (!this.isInsertedFirstTry(new SinglyLinkedList(newNode), hashingMethodIndex)) {
+            HashNode hashNode = this.hashTable[hashingMethodIndex];
+            ((SinglyLinkedList) hashNode.getContent()).insertAtEnd(newNode);
+        }
+    }
+    private boolean isInsertedFirstTry(Object item, int index) {
+        boolean inserted = false;
+        if (!this.collisionExists(index)) {
+            this.hashTable[index] = new HashNode(item);
+            inserted = true;
+        }
+        return inserted;
     }
     private void insertByDivisionAndLinearProbing(T item) {
 
@@ -137,6 +142,10 @@ public class HashTable<T> {
         return (3 * itemRepresentation) + 1;
     }
     private boolean isRehashingNeeded() { return (((float) this.quantity/this.capacity) > this.LOAD_FACTOR); }
+    private void resize() {
+        int newLength = this.capacity *= 2;
+        this.hashTable = Arrays.copyOf(this.hashTable, newLength);
+    }
     private boolean collisionExists(int index) {
         return this.hashTable[index] != null;
     }

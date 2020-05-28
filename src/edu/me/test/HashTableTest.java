@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 
 class HashTableTest {
-    static HashTable<SinglyLinkedListNode<Integer>> openHashTable;
-    private static final ArrayList<SinglyLinkedListNode<Integer>> dataList = new ArrayList<>(); {{
+    static HashTable<SinglyLinkedListNode> openHashTable;
+    private static final ArrayList<SinglyLinkedListNode> dataList = new ArrayList<>(); {{
 
     }};
 
@@ -19,14 +19,14 @@ class HashTableTest {
         try {
             System.out.println("Hash table prepare to initialize");
 
-            dataList.add(new SinglyLinkedListNode<>(3));
-            dataList.add(new SinglyLinkedListNode<>(2));
-            dataList.add(new SinglyLinkedListNode<>(9));
-            dataList.add(new SinglyLinkedListNode<>(6));
-            dataList.add(new SinglyLinkedListNode<>(11));
-            dataList.add(new SinglyLinkedListNode<>(13));
-            dataList.add(new SinglyLinkedListNode<>(7));
-            dataList.add(new SinglyLinkedListNode<>(12));
+            dataList.add(new SinglyLinkedListNode(3));
+            dataList.add(new SinglyLinkedListNode(2));
+            dataList.add(new SinglyLinkedListNode(9));
+            dataList.add(new SinglyLinkedListNode(6));
+            dataList.add(new SinglyLinkedListNode(11));
+            dataList.add(new SinglyLinkedListNode(13));
+            dataList.add(new SinglyLinkedListNode(7));
+            dataList.add(new SinglyLinkedListNode(12));
 
             openHashTable = new HashTable<>(10, HashingMethod.HashingTechnique.DIVISION, CollisionMethod.CollisionTechnique.CHAINING, 0.75f);
             System.out.println("Finished successfully the hash initialization");
@@ -38,7 +38,7 @@ class HashTableTest {
 
     @Test
     void insert() {
-        for (SinglyLinkedListNode<Integer> node : dataList) {
+        for (SinglyLinkedListNode node : dataList) {
             openHashTable.insert(node);
         }
         System.out.println("finished inserting");

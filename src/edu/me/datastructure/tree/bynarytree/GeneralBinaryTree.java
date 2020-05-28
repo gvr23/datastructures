@@ -225,27 +225,27 @@ public abstract class GeneralBinaryTree<T> extends GeneralTree<T> {
     protected GeneralBinaryNode<T> getParentLeafFromNode(T internalNode) {
         boolean foundLeaf = false;
         GeneralBinaryNode<T> internalMod = (GeneralBinaryNode<T>) internalNode;
-        SinglyLinkedList<GeneralBinaryNode<T>> auxSinglyLinkedList = new SinglyLinkedList<GeneralBinaryNode<T>>((SinglyLinkedListNode<GeneralBinaryNode<T>>) new SinglyLinkedListNode<>(internalMod.getData()));
-        GeneralBinaryNode<T> nodeToRemove = auxSinglyLinkedList.getHead().getData();
+        SinglyLinkedList auxSinglyLinkedList = new SinglyLinkedList(new SinglyLinkedListNode(internalMod.getData()));
+        GeneralBinaryNode<T> nodeToRemove = (GeneralBinaryNode<T>) auxSinglyLinkedList.getHead().getData();
         GeneralBinaryNode<T> leafNode = null;
 
         while (!auxSinglyLinkedList.isEmpty()) {
-            GeneralBinaryNode<T> current = auxSinglyLinkedList.removeAtEnd().getData();
+            GeneralBinaryNode<T> current = (GeneralBinaryNode<T>) auxSinglyLinkedList.removeAtEnd().getData();
 
-            if (this.checkEquality((T) current, internalNode)) auxSinglyLinkedList.insertAtBeginning((SinglyLinkedListNode<GeneralBinaryNode<T>>) new SinglyLinkedListNode<>(current.getData()));
+            if (this.checkEquality((T) current, internalNode)) auxSinglyLinkedList.insertAtBeginning(new SinglyLinkedListNode(current.getData()));
             if (!this.checkIfNull((T) current.getRight())) {
                 if (current.getRight().hasNoChildren()) {
                     leafNode = current.getRight();
                     foundLeaf = true;
                 }
-                auxSinglyLinkedList.insertAfter(auxSinglyLinkedList.getHead(), new SinglyLinkedListNode<>(current.getRight()));
+                auxSinglyLinkedList.insertAfter(auxSinglyLinkedList.getHead(), new SinglyLinkedListNode(current.getRight()));
             }
             if (!this.checkIfNull((T) current.getLeft())) {
                 if (current.getLeft().hasNoChildren()) {
                     leafNode = current.getLeft();
                     foundLeaf = true;
                 }
-                auxSinglyLinkedList.insertAfter(auxSinglyLinkedList.getHead(), new SinglyLinkedListNode<>(current.getLeft()));
+                auxSinglyLinkedList.insertAfter(auxSinglyLinkedList.getHead(), new SinglyLinkedListNode(current.getLeft()));
             }
 
             if (foundLeaf) {

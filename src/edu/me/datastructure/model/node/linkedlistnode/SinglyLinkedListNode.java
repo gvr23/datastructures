@@ -2,18 +2,18 @@ package edu.me.datastructure.model.node.linkedlistnode;
 
 import edu.me.datastructure.model.node.GeneralNode;
 
-public class SinglyLinkedListNode<T> extends GeneralNode<T> {
-    private SinglyLinkedListNode<T> next;
+public class SinglyLinkedListNode extends GeneralNode<Object> {
+    private SinglyLinkedListNode next;
 
-    public SinglyLinkedListNode(T data) {
+    public SinglyLinkedListNode(Object data) {
         super(data);
         this.next = null;
     }
 
-    public SinglyLinkedListNode<T> getNext() {
+    public SinglyLinkedListNode getNext() {
         return next;
     }
-    public void setNext(SinglyLinkedListNode<T> next) {
+    public void setNext(SinglyLinkedListNode next) {
         this.next = next;
     }
 }
