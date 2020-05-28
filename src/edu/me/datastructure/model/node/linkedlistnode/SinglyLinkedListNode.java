@@ -5,8 +5,8 @@ import edu.me.datastructure.model.node.GeneralNode;
 public class SinglyLinkedListNode<T> extends GeneralNode<T> {
     private SinglyLinkedListNode<T> next;
 
-    public SinglyLinkedListNode(T data, int number) {
-        super(data, number);
+    public SinglyLinkedListNode(T data) {
+        super(data);
         this.next = null;
     }
 

@@ -4,9 +4,16 @@ import edu.me.datastructure.model.node.nodedirective.TreeNodeImp;
 
 public abstract class GeneralTreeNode<T> extends GeneralNode<T> implements TreeNodeImp<T> {
     private int timesVisited;
+    private int number;
 
     public GeneralTreeNode(T data, int number) {
-        super(data, number);
+        super(data);
+        this.number = number;
+    }
+
+    public int getNumber() { return number; }
+    public void setNumber(int number) {
+        this.number = number;
     }
 
     public int getTimesVisited() { return this.timesVisited; }

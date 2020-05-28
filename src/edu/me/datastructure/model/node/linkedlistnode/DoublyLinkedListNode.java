@@ -6,8 +6,8 @@ public class DoublyLinkedListNode<T> extends GeneralNode<T> {
     private DoublyLinkedListNode<T> previous;
     private DoublyLinkedListNode<T> next;
 
-    public DoublyLinkedListNode(T data, int number) {
-        super(data, number);
+    public DoublyLinkedListNode(T data) {
+        super(data);
         this.previous = null;
         this.next = null;
     }

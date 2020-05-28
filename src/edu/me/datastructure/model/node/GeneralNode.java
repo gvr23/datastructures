@@ -2,11 +2,9 @@ package edu.me.datastructure.model.node;
 
 public abstract class GeneralNode<T> {
     private T data;
-    private int number;
 
-    public GeneralNode(T data, int number) {
+    public GeneralNode(T data) {
         this.data = data;
-        this.number = number;
     }
 
     public T getData() {
@@ -16,12 +14,7 @@ public abstract class GeneralNode<T> {
         this.data = data;
     }
 
-    public int getNumber() {
-        return number;
-    }
-    public void setNumber(int number) {
-        this.number = number;
-    }
+
     public boolean contentNotNull() {
         return this.getData() != null;
     }
