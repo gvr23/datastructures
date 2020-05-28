@@ -59,6 +59,7 @@ public class HashTable<T> {
     private void insertByDivision(T item) {
 
     }
+    private int getIndexByDivisionHashing(int formulaResult) { return formulaResult % this.capacity; }
     private void insertByDivisionAndChaining() {
 
     }
