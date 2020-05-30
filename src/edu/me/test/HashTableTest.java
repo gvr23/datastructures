@@ -10,14 +10,14 @@ import java.util.ArrayList;
 
 class HashTableTest {
     private final float LOAD_FACTOR = 0.75f;
-    private final ArrayList<SinglyLinkedListNode> dataList = new ArrayList<>();
+    private ArrayList<SinglyLinkedListNode> dataList;
     private HashTable openHashTable;
 
     @BeforeEach
     void setUp() {
         try {
             System.out.println("Hash table prepare to initialize");
-
+            this.dataList = new ArrayList<>();
             this.dataList.add(new SinglyLinkedListNode(3));
             this.dataList.add(new SinglyLinkedListNode(2));
             this.dataList.add(new SinglyLinkedListNode(9));
@@ -58,19 +58,9 @@ class HashTableTest {
 
     @Test
     void insertingQuadraticProbing() {
-        HashNode surrogateNode;
         this.openHashTable = new HashTable(10, HashingMethod.HashingTechnique.DIVISION, CollisionMethod.CollisionTechnique.QUADRATIC_PROBING, LOAD_FACTOR);
-        for (SinglyLinkedListNode node : dataList) {
-            surrogateNode = new HashNode(node);
-            surrogateNode.setNumericRepresentation((Integer) node.getData());
-            openHashTable.insert(surrogateNode);
-        }
         System.out.println("Finished inserting with quadratic probing");
-        for (HashNode node : this.openHashTable.getHashTable()) {
-            int itemToPrint = (node == null) ? 0 : (int) ((SinglyLinkedListNode) node.getContent()).getData();
-            System.out.print(String.format(" <-- %s", itemToPrint));
-        }
-        System.out.println();
+        this.insertTestHelper();
         System.out.println("Finished printing with quadratic probing");
     }
 

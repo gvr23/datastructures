@@ -55,6 +55,7 @@ public class HashTable {
         int hashingMethodIndex = HashingMethod.getIndexByDivisionHashing(hashingResult, this.capacity);
 
         if (!this.isInserted(item, hashingMethodIndex)) {
+            item.setFirstCollidedLocation(hashingMethodIndex);
             switch (this.cTechnique) {
                 case CHAINING:
                     this.chainingCollision(item, hashingMethodIndex);
@@ -90,30 +91,37 @@ public class HashTable {
     }
     private void insertByDivisionAndLinearProbing(HashNode item, int collidedIndex) {
         int probes = 0;
-        int indexToInsertAttempt = collidedIndex;
-        while (probes < this.hashTable.length && !this.isInserted(item, indexToInsertAttempt)) {
+        int indexToInsertAttempt;
+        boolean isInserted = false;
+
+        while (probes < this.hashTable.length && !isInserted) {
             probes++;
             indexToInsertAttempt = CollisionMethod.linearProbingDivisionIndex(collidedIndex, probes, this.capacity);
+            isInserted = this.isInserted(item, indexToInsertAttempt);
         }
         item.setProbes(probes);
     }
     private void insertByDivisionAndQuadraticProbing(HashNode item, int collidedIndex) {
         int probes = 0;
-        int indexToInsertAttempt = collidedIndex;
-        while (probes < this.hashTable.length && !this.isInserted(item, indexToInsertAttempt)) {
+        int indexToInsertAttempt;
+        boolean isInserted = false;
+        while (probes < this.hashTable.length && !isInserted) {
             probes++;
             indexToInsertAttempt = CollisionMethod.quadraticProbingDivisionIndex(collidedIndex, probes, this.capacity);
+            isInserted = this.isInserted(item, indexToInsertAttempt);
         }
         item.setProbes(probes);
     }
     private void insertByDivisionAndDoubleHashing(HashNode item, int collidedIndex) {
         int probes = 0;
         int secondLevelHashing = this.secondLevelHashing(item.getNumericRepresentation());
-        int indexToInsertAttempt = collidedIndex;
+        int indexToInsertAttempt;
+        boolean isInserted = false;
 
-        while (probes < this.hashTable.length && !this.isInserted(item, indexToInsertAttempt)) {
+        while (probes < this.hashTable.length && !isInserted) {
             probes++;
             indexToInsertAttempt = CollisionMethod.doubleHashingDivisionIndex(collidedIndex, secondLevelHashing, probes, this.capacity);
+            isInserted = this.isInserted(item, indexToInsertAttempt);
         }
         item.setProbes(probes);
     }
@@ -170,7 +178,14 @@ public class HashTable {
         this.hashTable = Arrays.copyOf(this.hashTable, newLength);
     }
     private boolean collisionExists(int index) {
-        return this.hashTable[index] != null;
+        HashNode fetchedNode = this.hashTable[index];
+        boolean collided = false;
+
+        if (fetchedNode != null) {
+            collided = true;
+            fetchedNode.addACollidedNumber();
+        }
+        return collided;
     }
 
     private boolean isEmpty() { return this.quantity == 0; }
