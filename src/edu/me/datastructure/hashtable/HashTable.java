@@ -66,7 +66,7 @@ public class HashTable {
                     this.insertByDivisionAndQuadraticProbing(item, hashingMethodIndex);
                     break;
                 case DOUBLE_HASHING:
-                    this.insertByDivisionAndDoubleHashing(item);
+                    this.insertByDivisionAndDoubleHashing(item, hashingMethodIndex);
                     break;
             }
         }
@@ -106,8 +106,16 @@ public class HashTable {
         }
         item.setProbes(probes);
     }
-    private void insertByDivisionAndDoubleHashing(HashNode item) {
+    private void insertByDivisionAndDoubleHashing(HashNode item, int collidedIndex) {
+        int probes = 0;
+        int secondLevelHashing = this.secondLevelHashing(item.getNumericRepresentation());
+        int indexToInsertAttempt = collidedIndex;
 
+        while (probes < this.hashTable.length && !this.isInserted(item, indexToInsertAttempt)) {
+            probes++;
+            indexToInsertAttempt = CollisionMethod.doubleHashingDivisionIndex(collidedIndex, secondLevelHashing, probes, this.capacity);
+        }
+        item.setProbes(probes);
     }
 
     private void insertByFolding(HashNode item) {

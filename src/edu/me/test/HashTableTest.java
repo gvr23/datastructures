@@ -7,7 +7,6 @@ import edu.me.datastructure.model.node.linkedlistnode.SinglyLinkedListNode;
 import org.junit.jupiter.api.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 class HashTableTest {
     private final float LOAD_FACTOR = 0.75f;
@@ -27,7 +26,6 @@ class HashTableTest {
             this.dataList.add(new SinglyLinkedListNode(13));
             this.dataList.add(new SinglyLinkedListNode(7));
             this.dataList.add(new SinglyLinkedListNode(12));
-
 
             System.out.println("Finished successfully the hash initialization");
         } catch (Exception e) {
@@ -52,19 +50,9 @@ class HashTableTest {
 
     @Test
     void insertLinearProbing() {
-        HashNode surrogateNode;
         this.openHashTable = new HashTable(10, HashingMethod.HashingTechnique.DIVISION, CollisionMethod.CollisionTechnique.LINEAR_PROBING, LOAD_FACTOR);
-        for (SinglyLinkedListNode node : dataList) {
-            surrogateNode = new HashNode(node);
-            surrogateNode.setNumericRepresentation((Integer) node.getData());
-            openHashTable.insert(surrogateNode);
-        }
         System.out.println("finished inserting with linear probing");
-        for (HashNode node : this.openHashTable.getHashTable()) {
-            int itemToPrint = (node == null) ? 0 : (int) ((SinglyLinkedListNode) node.getContent()).getData();
-            System.out.print(String.format(" <-- %s", itemToPrint));
-        }
-        System.out.println();
+        this.insertTestHelper();
         System.out.println("Finished printing with linear probing");
     }
 
@@ -84,6 +72,27 @@ class HashTableTest {
         }
         System.out.println();
         System.out.println("Finished printing with quadratic probing");
+    }
+
+    @Test
+    void insertingWithDoubleHashing() {
+        this.openHashTable = new HashTable(10, HashingMethod.HashingTechnique.DIVISION, CollisionMethod.CollisionTechnique.DOUBLE_HASHING, LOAD_FACTOR);
+        System.out.println("Finished inserting with double hashing");
+        this.insertTestHelper();
+        System.out.println("Finished printing with  double hashing");
+    }
+    private void insertTestHelper() {
+        HashNode surrogateNode;
+        for (SinglyLinkedListNode node : dataList) {
+            surrogateNode = new HashNode(node);
+            surrogateNode.setNumericRepresentation((Integer) node.getData());
+            openHashTable.insert(surrogateNode);
+        }
+        for (HashNode node : this.openHashTable.getHashTable()) {
+            int itemToPrint = (node == null) ? 0 : (int) ((SinglyLinkedListNode) node.getContent()).getData();
+            System.out.print(String.format(" <-- %s", itemToPrint));
+        }
+        System.out.println();
     }
 
     @AfterEach
