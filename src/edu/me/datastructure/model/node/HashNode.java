@@ -3,6 +3,7 @@ package edu.me.datastructure.model.node;
 public class HashNode {
     private Object content;
     private int probes;
+    private int secondLevelHashing;
     private int firstCollidedLocation;
     private int collidedNumbersQuantity;
     private int numericRepresentation;
@@ -11,6 +12,14 @@ public class HashNode {
         this.content = content;
         this.collidedNumbersQuantity = 0;
         this.probes = 0;
+    }
+
+    public void setSecondLevelHashing(int secondLevelHashing) {
+        this.secondLevelHashing = secondLevelHashing;
+    }
+
+    public int getSecondLevelHashing() {
+        return secondLevelHashing;
     }
 
     public Object getContent() {

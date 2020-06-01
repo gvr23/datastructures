@@ -1,6 +1,6 @@
-import edu.me.datastructure.hashtable.CollisionMethod;
+import edu.me.datastructure.hashtable.CollisionTechniqueE;
 import edu.me.datastructure.hashtable.HashTable;
-import edu.me.datastructure.hashtable.HashingMethod;
+import edu.me.datastructure.hashtable.HashingTechniqueE;
 import edu.me.datastructure.linkedlist.SinglyLinkedList;
 import edu.me.datastructure.model.node.HashNode;
 import edu.me.datastructure.model.node.linkedlistnode.SinglyLinkedListNode;
@@ -38,7 +38,7 @@ class HashTableTest {
     void insertChaining() {
         HashNode surrogateNode;
         SinglyLinkedList surrogateList;
-        this.openHashTable = new HashTable(10, HashingMethod.HashingTechnique.DIVISION, CollisionMethod.CollisionTechnique.CHAINING, LOAD_FACTOR);
+        this.openHashTable = new HashTable(10, HashingTechniqueE.DIVISION, CollisionTechniqueE.CHAINING, LOAD_FACTOR);
         for (SinglyLinkedListNode node : dataList) {
             surrogateList = new SinglyLinkedList(node);
             surrogateNode = new HashNode(surrogateList);
@@ -50,7 +50,7 @@ class HashTableTest {
 
     @Test
     void insertLinearProbing() {
-        this.openHashTable = new HashTable(10, HashingMethod.HashingTechnique.DIVISION, CollisionMethod.CollisionTechnique.LINEAR_PROBING, LOAD_FACTOR);
+        this.openHashTable = new HashTable(10, HashingTechniqueE.DIVISION, CollisionTechniqueE.LINEAR_PROBING, LOAD_FACTOR);
         System.out.println("finished inserting with linear probing");
         this.insertTestHelper();
         System.out.println("Finished printing with linear probing");
@@ -58,7 +58,7 @@ class HashTableTest {
 
     @Test
     void insertingQuadraticProbing() {
-        this.openHashTable = new HashTable(10, HashingMethod.HashingTechnique.DIVISION, CollisionMethod.CollisionTechnique.QUADRATIC_PROBING, LOAD_FACTOR);
+        this.openHashTable = new HashTable(10, HashingTechniqueE.DIVISION, CollisionTechniqueE.QUADRATIC_PROBING, LOAD_FACTOR);
         System.out.println("Finished inserting with quadratic probing");
         this.insertTestHelper();
         System.out.println("Finished printing with quadratic probing");
@@ -66,7 +66,7 @@ class HashTableTest {
 
     @Test
     void insertingWithDoubleHashing() {
-        this.openHashTable = new HashTable(10, HashingMethod.HashingTechnique.DIVISION, CollisionMethod.CollisionTechnique.DOUBLE_HASHING, LOAD_FACTOR);
+        this.openHashTable = new HashTable(10, HashingTechniqueE.DIVISION, CollisionTechniqueE.DOUBLE_HASHING, LOAD_FACTOR);
         System.out.println("Finished inserting with double hashing");
         this.insertTestHelper();
         System.out.println("Finished printing with  double hashing");
@@ -84,6 +84,14 @@ class HashTableTest {
         }
         System.out.println();
     }
+
+//    @Test
+//    void searching() {
+//        this.openHashTable = new HashTable(10, HashingTechniqueE.DIVISION, CollisionTechniqueEnum.LINEAR_PROBING, LOAD_FACTOR);
+//        this.insertTestHelper();
+//        System.out.println("Searching for 11");
+////        this.openHashTable.search(11);
+//    }
 
     @AfterEach
     void tearDown() {
