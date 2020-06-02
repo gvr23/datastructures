@@ -1,5 +1,7 @@
 package edu.me.datastructure.hashtable;
 
+import edu.me.datastructure.hashtable.option.CollisionTechniqueE;
+import edu.me.datastructure.hashtable.option.HashingTechniqueE;
 import edu.me.datastructure.model.node.HashNode;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
@@ -8,6 +10,7 @@ public class HashTable {
     private final float LOAD_FACTOR;
     private final HashingTechniqueE hMethod;
     private final CollisionTechniqueE cTechnique;
+    private final CollisionFactory collisionFactory;
     private int capacity;
     private int quantity;
     private HashNode[] hashTable;
@@ -20,6 +23,7 @@ public class HashTable {
         this.cTechnique = cTechnique;
         this.LOAD_FACTOR = loadFactor;
         this.hashTable = new HashNode[this.capacity];
+        this.collisionFactory = CollisionFactory.getInstance();
     }
 
     public int getCapacity() {
@@ -42,8 +46,20 @@ public class HashTable {
         int firstHashingResult = this.firstLevelHashing(item.getNumericRepresentation());
         int hashingMethodIndex = this.hMethod.getIndex(firstHashingResult, this.capacity);
 
+        if (!this.isInserted(item, hashingMethodIndex)) this.shipToCollisionFactory(item, hashingMethodIndex);
+        if (this.isRehashingNeeded() && !cTechnique.equals(CollisionTechniqueE.CHAINING)) this.resize();
+    }
+    protected boolean isInserted(HashNode item, int index) {
+        boolean inserted = false;
+        if (!this.collisionFactory.collisionExists(index, new WeakReference<>(this))) {
+            this.hashTable[index] = item;
+            this.quantity++;
+            inserted = true;
+        }
+        return inserted;
+    }
+    private void shipToCollisionFactory(HashNode item, int hashingMethodIndex) {
         if (!this.isInserted(item, hashingMethodIndex)) {
-            CollisionFactory collisionFactory = CollisionFactory.getInstance();
             item.setFirstCollidedLocation(hashingMethodIndex);
             if (this.cTechnique.equals(CollisionTechniqueE.DOUBLE_HASHING)) {
                 int secondHashingResult = this.secondLevelHashing(item.getNumericRepresentation());
@@ -51,29 +67,8 @@ public class HashTable {
                 if (secondHashingIndex == 0) return;
                 item.setSecondLevelHashing(secondHashingIndex);
             }
-            collisionFactory.collisionInsertion(item, new WeakReference<>(this));
+            this.collisionFactory.collisionRedirection(item, new WeakReference<>(this));
         }
-
-        if (this.isRehashingNeeded() && !cTechnique.equals(CollisionTechniqueE.CHAINING)) this.resize();
-    }
-    boolean isInserted(HashNode item, int index) {
-        boolean inserted = false;
-        if (!this.collisionExists(index)) {
-            this.hashTable[index] = item;
-            this.quantity++;
-            inserted = true;
-        }
-        return inserted;
-    }
-    private boolean collisionExists(int index) {
-        HashNode fetchedNode = this.hashTable[index];
-        boolean collided = false;
-
-        if (fetchedNode != null) {
-            collided = true;
-            fetchedNode.addACollidedNumber();
-        }
-        return collided;
     }
 
     public HashNode remove(HashNode item) {

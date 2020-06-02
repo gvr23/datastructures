@@ -1,6 +1,6 @@
-import edu.me.datastructure.hashtable.CollisionTechniqueE;
+import edu.me.datastructure.hashtable.option.CollisionTechniqueE;
 import edu.me.datastructure.hashtable.HashTable;
-import edu.me.datastructure.hashtable.HashingTechniqueE;
+import edu.me.datastructure.hashtable.option.HashingTechniqueE;
 import edu.me.datastructure.linkedlist.SinglyLinkedList;
 import edu.me.datastructure.model.node.HashNode;
 import edu.me.datastructure.model.node.linkedlistnode.SinglyLinkedListNode;
