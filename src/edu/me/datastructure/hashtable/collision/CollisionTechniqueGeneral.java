@@ -6,18 +6,18 @@ import edu.me.datastructure.model.node.HashNode;
 public abstract class CollisionTechniqueGeneral {
     private CollisionTechniqueE colTechnique;
 
-    public synchronized void setColTechnique(CollisionTechniqueE colTechnique) {
+    public void setColTechnique(CollisionTechniqueE colTechnique) {
         this.colTechnique = colTechnique;
     }
 
     public int getIndex(HashNode item, int currentPosition, int capacity) {
         switch (this.colTechnique) {
             case LINEAR_PROBING:
-                return this.getIndexByLinearProbing(item.getFirstCollidedLocation(), currentPosition, capacity);
+                return this.getIndexByLinearProbing(item.getFirstLocation(), currentPosition, capacity);
             case QUADRATIC_PROBING:
-                return this.getIndexByQuadraticProbing(item.getFirstCollidedLocation(), currentPosition, capacity);
+                return this.getIndexByQuadraticProbing(item.getFirstLocation(), currentPosition, capacity);
             case DOUBLE_HASHING:
-                return this.getIndexByDoubleHashing(item.getFirstCollidedLocation(), item.getSecondLevelHashing(), currentPosition, capacity);
+                return this.getIndexByDoubleHashing(item.getFirstLocation(), item.getSecondLevelHashing(), currentPosition, capacity);
             default:
                 return -1;
         }
