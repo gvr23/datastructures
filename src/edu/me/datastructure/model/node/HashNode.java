@@ -8,15 +8,14 @@ public class HashNode {
     }
     private Object content;
     private int probes;
-    private int secondLevelHashing;
-    private int firstLocation;
-    private int collidedNumbersQuantity;
+    private int firstLevelIndex;
+    private int secondLevelIndex;
+    private int location;
     private int numericRepresentation;
     private HashNodeStates state;
 
     public HashNode(Object content) {
         this.content = content;
-        this.collidedNumbersQuantity = 0;
         this.probes = 0;
         this.state = HashNodeStates.ACTIVE;
     }
@@ -30,11 +29,15 @@ public class HashNode {
     public int getNumericRepresentation() {
         return numericRepresentation;
     }
-    public int getFirstLocation() {
-        return firstLocation;
+    public int getLocation() {
+        return location;
     }
-    public int getSecondLevelHashing() {
-        return secondLevelHashing;
+    public int getFirstLevelIndex() {
+        return firstLevelIndex;
+    }
+
+    public int getSecondLevelIndex() {
+        return secondLevelIndex;
     }
 
     public void setContent(Object content) {
@@ -46,11 +49,14 @@ public class HashNode {
     public void setNumericRepresentation(int numericRepresentation) {
         this.numericRepresentation = numericRepresentation;
     }
-    public void setLocation(int firstLocation) {
-        this.firstLocation = firstLocation;
+    public void setLocation(int location) {
+        this.location = location;
     }
-    public void setSecondLevelHashing(int secondLevelHashing) {
-        this.secondLevelHashing = secondLevelHashing;
+    public void setFirstLevelIndex(int firstLevelIndex) {
+        this.firstLevelIndex = firstLevelIndex;
+    }
+    public void setSecondLevelIndex(int secondLevelIndex) {
+        this.secondLevelIndex = secondLevelIndex;
     }
 
     public boolean checkEquality(Object content) {
@@ -73,16 +79,14 @@ public class HashNode {
     public String toString() {
         return  String.format("HashNode (#%s) {", this.numericRepresentation) +
                 String.format("\n   State: %s", this.state) +
-                String.format("\n   FirstLocation: %s", this.firstLocation) +
-                String.format("\n   CollidedNumbersQuantity: %s", this.collidedNumbersQuantity) +
+                String.format("\n   Location: %s", this.location) +
                 String.format("\n   Probes: %s ", this.probes) +
                 "\n}";
     }
 
-    public HashNode transferTo() {
-        HashNode item = new HashNode(this.content);
+    public void transferTo(HashNode item) {
+        item.setContent(this.content);
         item.setProbes(this.probes);
-        item.setLocation(this.firstLocation);
-        return item;
+        item.setLocation(this.location);
     }
 }

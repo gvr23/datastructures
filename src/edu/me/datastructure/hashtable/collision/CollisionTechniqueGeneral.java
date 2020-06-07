@@ -13,11 +13,11 @@ public abstract class CollisionTechniqueGeneral {
     public int getIndex(HashNode item, int currentPosition, int capacity) {
         switch (this.colTechnique) {
             case LINEAR_PROBING:
-                return this.getIndexByLinearProbing(item.getFirstLocation(), currentPosition, capacity);
+                return this.getIndexByLinearProbing(item.getFirstLevelIndex(), currentPosition, capacity);
             case QUADRATIC_PROBING:
-                return this.getIndexByQuadraticProbing(item.getFirstLocation(), currentPosition, capacity);
+                return this.getIndexByQuadraticProbing(item.getFirstLevelIndex(), currentPosition, capacity);
             case DOUBLE_HASHING:
-                return this.getIndexByDoubleHashing(item.getFirstLocation(), item.getSecondLevelHashing(), currentPosition, capacity);
+                return this.getIndexByDoubleHashing(item.getFirstLevelIndex(), item.getSecondLevelIndex(), currentPosition, capacity);
             default:
                 return -1;
         }

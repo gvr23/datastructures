@@ -4,6 +4,9 @@ import edu.me.datastructure.hashtable.option.CollisionTechniqueE;
 import edu.me.datastructure.hashtable.option.HashingTechniqueE;
 import edu.me.datastructure.model.node.HashNode;
 
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 public class HashTable {
     private final float MAX_ALLOWED_CAPACITY;
     private final float MIN_ALLOWED_CAPACITY;
@@ -13,6 +16,7 @@ public class HashTable {
     private int capacity;
     private int quantity;
     private HashNode[] hashArray;
+    private boolean rehashing;
 
 
     public HashTable(int capacity, HashingTechniqueE hMethod, CollisionTechniqueE cTechnique, float maxCapacity, float minCapacity) {
@@ -25,6 +29,7 @@ public class HashTable {
         this.hashArray = new HashNode[this.capacity];
         CollisionFactory.setHashTableClassReference(this);
         this.collisionFactory = CollisionFactory.getInstance();
+        this.rehashing = false;
     }
 
     public int getCapacity() {
@@ -45,14 +50,15 @@ public class HashTable {
 
     public void insert(Object item, int itemRepresentation) {
         HashNode surrogateNode = this.attachNodeToContent(item, itemRepresentation);
-        int firstLevelIndex = this.getFirstLevelIndex(surrogateNode.getNumericRepresentation());
 
-        if (!this.isInserted(surrogateNode, firstLevelIndex)) this.shipToCollisionFactory(surrogateNode);
-        if (this.isRehashingNeeded() && !cTechnique.equals(CollisionTechniqueE.CHAINING)) this.resize();
+        if (!this.isInserted(surrogateNode, surrogateNode.getFirstLevelIndex())) this.shipToCollisionFactory(surrogateNode);
+        if (this.isRehashingNeeded() && !cTechnique.equals(CollisionTechniqueE.CHAINING)) this.resize(() -> this.capacity * 2);
     }
     private HashNode attachNodeToContent(Object content, int numericRepresentation) {
         HashNode node = new HashNode(content);
+        int firstLevelIndex = this.getFirstLevelIndex(numericRepresentation);
         node.setNumericRepresentation(numericRepresentation);
+        node.setFirstLevelIndex(firstLevelIndex);
         return node;
     }
     private int firstLevelHashing(int itemRepresentation) {
@@ -64,22 +70,23 @@ public class HashTable {
     }
     protected boolean isInserted(HashNode item, int index) {
         boolean inserted = false;
+
         if (!this.collisionFactory.collisionExists(index)) {
             item.setLocation(index);
             this.hashArray[index] = item;
-            this.quantity++;
+            if (!this.rehashing) this.quantity++;
             inserted = true;
         }
         return inserted;
     }
     private Object shipToCollisionFactory(HashNode item) {
-        if (this.cTechnique.equals(CollisionTechniqueE.DOUBLE_HASHING)) {
-            int secondHashingResult = this.secondLevelHashing(item.getNumericRepresentation());
-            int secondHashingIndex = secondHashingResult % this.capacity;
-            if (secondHashingIndex == 0) return false;
-            item.setSecondLevelHashing(secondHashingIndex);
-        }
-         return this.collisionFactory.collisionRedirection(item);
+        if (this.cTechnique.equals(CollisionTechniqueE.DOUBLE_HASHING)) this.attachSecondLevelIndex(item);
+        return this.collisionFactory.collisionRedirection(item);
+    }
+    private void attachSecondLevelIndex(HashNode item) {
+        int secondHashingResult = this.secondLevelHashing(item.getNumericRepresentation());
+        int secondHashingIndex = secondHashingResult % this.capacity;
+        if (secondHashingIndex != 0) item.setSecondLevelIndex(secondHashingIndex);
     }
     private int secondLevelHashing(int itemRepresentation) {
         return (3 * itemRepresentation) + 1;
@@ -92,17 +99,19 @@ public class HashTable {
         return (((float) this.quantity / this.capacity) < this.MIN_ALLOWED_CAPACITY);
     }
 
-    private void resize() {
-        this.capacity *= 2;
+    private void resize(Supplier<Integer> getNewCapacity) {
+        this.capacity = getNewCapacity.get();
+        this.rehashing = true;
         HashNode[] tempHashNodeArray = this.hashArray;
         this.hashArray = new HashNode[this.capacity];
         for (HashNode node : tempHashNodeArray) {
             if (node != null) this.reInsert(node);
         }
+        this.rehashing = false;
     }
     private void reInsert(HashNode originalNode) {
-        int firstLevelIndex = this.getFirstLevelIndex(originalNode.getNumericRepresentation());
-        if (!isReinserted(firstLevelIndex, originalNode)) this.shipToCollisionFactory(originalNode);
+        originalNode = this.attachNodeToContent(originalNode.getContent(),originalNode.getNumericRepresentation());
+        if (!isReinserted(originalNode.getFirstLevelIndex(), originalNode)) this.shipToCollisionFactory(originalNode);
     }
     private boolean isReinserted(int location, HashNode node) {
         boolean inserted = false;
@@ -119,28 +128,26 @@ public class HashTable {
         HashNode nodeCopy = null;
 
         if (searchedNode != null) {
+            nodeCopy = new HashNode(-1);
             searchedNode.changeToDeleted();
-            nodeCopy = searchedNode.transferTo();
-            this.removeNode(searchedNode.getFirstLocation());
-        } else {
-            searchedNode = this.attachNodeToContent(numericRepresentation, numericRepresentation);
-            searchedNode.changeToDeleted();
-            int firstLevelIndex = this.getFirstLevelIndex(numericRepresentation);
-            searchedNode.setLocation(firstLevelIndex);
-            searchedNode = (HashNode) this.shipToCollisionFactory(searchedNode);
-            if (searchedNode!= null){
-                //TODO: error with -7 in double hashing
-                searchedNode.setLocation(searchedNode.getFirstLocation());
-                this.removeNode(searchedNode.getFirstLocation());
-            }
-        }
-
+            searchedNode.transferTo(nodeCopy);
+            this.removeNode(searchedNode.getLocation());
+        } else this.deleteByCollision(this.attachNodeToContent(numericRepresentation, numericRepresentation));
+        if (this.isUnderHashingNeeded() && !cTechnique.equals(CollisionTechniqueE.CHAINING)) this.resize(() -> this.capacity / 2);
         return nodeCopy;
+    }
+    private void deleteByCollision(HashNode nodeToDelete) {
+        nodeToDelete.changeToDeleted();
+        nodeToDelete.setLocation(nodeToDelete.getFirstLevelIndex());
+        nodeToDelete = (HashNode) this.shipToCollisionFactory(nodeToDelete);
+        if (nodeToDelete != null){
+            nodeToDelete.setLocation(nodeToDelete.getLocation());
+            this.removeNode(nodeToDelete.getLocation());
+        }
     }
     public HashNode search(int numericRepresentation) {
         HashNode surrogateNode = this.attachNodeToContent(numericRepresentation, numericRepresentation);
-        int firstLevelIndex = this.getFirstLevelIndex(numericRepresentation);
-        HashNode possibleNode = this.hashArray[firstLevelIndex];
+        HashNode possibleNode = this.hashArray[surrogateNode.getFirstLevelIndex()];
 
         if (possibleNode != null) {
             if (possibleNode.getNumericRepresentation() != numericRepresentation) {
@@ -156,11 +163,14 @@ public class HashTable {
     protected HashNode requestNode(int location) {
         return this.hashArray[location];
     }
-    protected void removeNode(int location) { this.hashArray[location] = null; }
+    protected void removeNode(int location) {
+        this.hashArray[location] = null;
+        this.quantity--;
+    }
     public boolean isEmpty() {
         boolean isEmpty = true;
-        for (int current = 0; current < this.hashArray.length; current++) {
-            if (this.hashArray[current] != null) {
+        for (HashNode hashNode : this.hashArray) {
+            if (hashNode != null) {
                 isEmpty = false;
                 break;
             }

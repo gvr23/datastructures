@@ -93,7 +93,7 @@ class HashTableTest {
 
     @Test
     void searching() {
-        this.openHashTable = new HashTable(10, HashingTechniqueE.DIVISION, CollisionTechniqueE.LINEAR_PROBING, M_ALLOWED_CAPACITY, MIN_ALLOWED_CAPACITY);
+        this.openHashTable = new HashTable(10, HashingTechniqueE.DIVISION, CollisionTechniqueE.CHAINING, M_ALLOWED_CAPACITY, MIN_ALLOWED_CAPACITY);
         this.insertTestHelper();
         System.out.println("Searching for 11");
         HashNode node = this.openHashTable.search(11);
@@ -102,9 +102,9 @@ class HashTableTest {
 
     @Test
     void deleting() {
-        this.openHashTable = new HashTable(10, HashingTechniqueE.DIVISION, CollisionTechniqueE.LINEAR_PROBING, M_ALLOWED_CAPACITY, MIN_ALLOWED_CAPACITY);
+        this.openHashTable = new HashTable(10, HashingTechniqueE.DIVISION, CollisionTechniqueE.CHAINING, M_ALLOWED_CAPACITY, MIN_ALLOWED_CAPACITY);
         System.out.println("started deletingTest");
-        System.out.println("     inserting with linear probing");
+        System.out.println("     inserting nodes");
         this.insertTestHelper();
         System.out.println("     ---------------------------------------------");
         System.out.println("     Began removing process");
@@ -119,6 +119,30 @@ class HashTableTest {
         System.out.println("     ----------------------");
 
         System.out.println("Finished deletingTest");
+    }
+
+    @Test
+    void repopulating() {
+        this.openHashTable = new HashTable(10, HashingTechniqueE.DIVISION, CollisionTechniqueE.DOUBLE_HASHING, M_ALLOWED_CAPACITY, MIN_ALLOWED_CAPACITY);
+        System.out.println("started deletingTest");
+        System.out.println("     inserting nodes");
+        this.insertTestHelper();
+        System.out.println("     ---------------------------------------------");
+        System.out.println("     Began removing process");
+
+        for (SinglyLinkedListNode node : this.dataList) {
+            if (!this.openHashTable.isEmpty()) {
+                int data = (int) node.getData();
+                this.openHashTable.remove(data);
+                this.printTestHelper();
+            }
+        }
+        System.out.println("     ----------------------");
+
+        System.out.println("     Began reinserting process");
+        this.insertTestHelper();
+        this.printTestHelper();
+        System.out.println("     ----------------------");
     }
 
     @AfterEach

@@ -60,7 +60,7 @@ public final class CollisionFactory {
             if (item.getContent() instanceof SinglyLinkedList) {
                 SinglyLinkedList newSinglyList = (SinglyLinkedList) item.getContent();
                 SinglyLinkedListNode newSinglyNode = newSinglyList.removeAtBeginning();
-                SinglyLinkedList collidedList = (SinglyLinkedList) hashTableClassReference.requestNode(item.getFirstLocation()).getContent();
+                SinglyLinkedList collidedList = (SinglyLinkedList) hashTableClassReference.requestNode(item.getLocation()).getContent();
                 collidedList.insertAtEnd(newSinglyNode);
             }
         } catch (Exception e) {
@@ -72,8 +72,8 @@ public final class CollisionFactory {
     }
     private boolean insertionProcess(HashNode item) {
         int probes = 0;
-        int indexToInsertAttempt = item.getFirstLocation();
-        boolean inserted = hashTableClassReference.isInserted(item, indexToInsertAttempt);
+        int indexToInsertAttempt;
+        boolean inserted = hashTableClassReference.isInserted(item, item.getFirstLevelIndex());
 
         try {
             int hashTableLength = hashTableClassReference.getLength();
@@ -81,6 +81,7 @@ public final class CollisionFactory {
             while (!inserted && (probes < hashTableLength)) {
                 probes++;
                 indexToInsertAttempt = collisionSatelliteDivision.getIndex(item, probes, hashTableClassReference.getCapacity());
+
                 inserted = hashTableClassReference.isInserted(item, indexToInsertAttempt);
             }
             item.setProbes(probes);
@@ -93,14 +94,16 @@ public final class CollisionFactory {
 
     public HashNode collisionSearch(HashNode surrogateNode) {
         int probes = 0;
-        int indexToSearch = surrogateNode.getFirstLocation();
+        int indexToSearch = surrogateNode.getFirstLevelIndex();
+        boolean found = false;
         HashNode possibleNode = hashTableClassReference.requestNode(indexToSearch);
 
         try {
-            while (possibleNode == null || (possibleNode.getNumericRepresentation() != surrogateNode.getNumericRepresentation()) && (probes < hashTableClassReference.getCapacity())) {
+            while (!found && (probes < hashTableClassReference.getCapacity())) {
                 probes++;
                 indexToSearch = collisionSatelliteDivision.getIndex(surrogateNode, probes, hashTableClassReference.getCapacity());
                 possibleNode = hashTableClassReference.requestNode(indexToSearch);
+                if (possibleNode != null && possibleNode.getNumericRepresentation() == surrogateNode.getNumericRepresentation()) found = true;
             }
             if (probes == hashTableClassReference.getCapacity()) possibleNode = null;
         } catch (Exception e) {
