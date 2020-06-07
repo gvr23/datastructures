@@ -1,6 +1,6 @@
-import edu.me.datastructure.hashtable.CollisionTechniqueE;
+import edu.me.datastructure.hashtable.option.CollisionTechniqueE;
 import edu.me.datastructure.hashtable.HashTable;
-import edu.me.datastructure.hashtable.HashingTechniqueE;
+import edu.me.datastructure.hashtable.option.HashingTechniqueE;
 import edu.me.datastructure.linkedlist.SinglyLinkedList;
 import edu.me.datastructure.model.node.HashNode;
 import edu.me.datastructure.model.node.linkedlistnode.SinglyLinkedListNode;
@@ -9,7 +9,8 @@ import org.junit.jupiter.api.*;
 import java.util.ArrayList;
 
 class HashTableTest {
-    private final float LOAD_FACTOR = 0.75f;
+    private final float M_ALLOWED_CAPACITY = 0.75f;
+    private final float MIN_ALLOWED_CAPACITY = 0.35f;
     private ArrayList<SinglyLinkedListNode> dataList;
     private HashTable openHashTable;
 
@@ -38,60 +39,111 @@ class HashTableTest {
     void insertChaining() {
         HashNode surrogateNode;
         SinglyLinkedList surrogateList;
-        this.openHashTable = new HashTable(10, HashingTechniqueE.DIVISION, CollisionTechniqueE.CHAINING, LOAD_FACTOR);
+        this.openHashTable = new HashTable(10, HashingTechniqueE.DIVISION, CollisionTechniqueE.CHAINING, M_ALLOWED_CAPACITY, MIN_ALLOWED_CAPACITY);
         for (SinglyLinkedListNode node : dataList) {
             surrogateList = new SinglyLinkedList(node);
             surrogateNode = new HashNode(surrogateList);
             surrogateNode.setNumericRepresentation((Integer) node.getData());
-            openHashTable.insert(surrogateNode);
+            openHashTable.insert(surrogateNode, (Integer) node.getData());
         }
         System.out.println("finished inserting with chaining");
     }
 
     @Test
     void insertLinearProbing() {
-        this.openHashTable = new HashTable(10, HashingTechniqueE.DIVISION, CollisionTechniqueE.LINEAR_PROBING, LOAD_FACTOR);
+        this.openHashTable = new HashTable(10, HashingTechniqueE.DIVISION, CollisionTechniqueE.LINEAR_PROBING, M_ALLOWED_CAPACITY, MIN_ALLOWED_CAPACITY);
         System.out.println("finished inserting with linear probing");
         this.insertTestHelper();
+        this.printTestHelper();
         System.out.println("Finished printing with linear probing");
     }
 
     @Test
     void insertingQuadraticProbing() {
-        this.openHashTable = new HashTable(10, HashingTechniqueE.DIVISION, CollisionTechniqueE.QUADRATIC_PROBING, LOAD_FACTOR);
+        this.openHashTable = new HashTable(10, HashingTechniqueE.DIVISION, CollisionTechniqueE.QUADRATIC_PROBING, M_ALLOWED_CAPACITY, MIN_ALLOWED_CAPACITY);
         System.out.println("Finished inserting with quadratic probing");
         this.insertTestHelper();
+        this.printTestHelper();
         System.out.println("Finished printing with quadratic probing");
     }
 
     @Test
     void insertingWithDoubleHashing() {
-        this.openHashTable = new HashTable(10, HashingTechniqueE.DIVISION, CollisionTechniqueE.DOUBLE_HASHING, LOAD_FACTOR);
+        this.openHashTable = new HashTable(10, HashingTechniqueE.DIVISION, CollisionTechniqueE.DOUBLE_HASHING, M_ALLOWED_CAPACITY, MIN_ALLOWED_CAPACITY);
         System.out.println("Finished inserting with double hashing");
         this.insertTestHelper();
+        this.printTestHelper();
         System.out.println("Finished printing with  double hashing");
     }
+
     private void insertTestHelper() {
-        HashNode surrogateNode;
         for (SinglyLinkedListNode node : dataList) {
-            surrogateNode = new HashNode(node);
-            surrogateNode.setNumericRepresentation((Integer) node.getData());
-            openHashTable.insert(surrogateNode);
+            openHashTable.insert(node, (Integer) node.getData());
         }
-        for (HashNode node : this.openHashTable.getHashTable()) {
-            int itemToPrint = (node == null) ? 0 : (int) ((SinglyLinkedListNode) node.getContent()).getData();
+    }
+
+    private void printTestHelper() {
+        HashNode[] hashArray = this.openHashTable.getHashArray();
+        for (HashNode node : hashArray) {
+            int itemToPrint = (node == null) ? 0 : node.getNumericRepresentation();
             System.out.print(String.format(" <-- %s", itemToPrint));
         }
         System.out.println();
     }
 
-//    @Test
-//    void searching() {
-//        this.openHashTable = new HashTable(10, HashingTechniqueE.DIVISION, CollisionTechniqueEnum.LINEAR_PROBING, LOAD_FACTOR);
-//        this.insertTestHelper();
-//        System.out.println("Searching for 11");
-////        this.openHashTable.search(11);
-//    }
+    @Test
+    void searching() {
+        this.openHashTable = new HashTable(10, HashingTechniqueE.DIVISION, CollisionTechniqueE.CHAINING, M_ALLOWED_CAPACITY, MIN_ALLOWED_CAPACITY);
+        this.insertTestHelper();
+        System.out.println("Searching for 11");
+        HashNode node = this.openHashTable.search(11);
+        System.out.println(node.toString());
+    }
+
+    @Test
+    void deleting() {
+        this.openHashTable = new HashTable(10, HashingTechniqueE.DIVISION, CollisionTechniqueE.CHAINING, M_ALLOWED_CAPACITY, MIN_ALLOWED_CAPACITY);
+        System.out.println("started deletingTest");
+        System.out.println("     inserting nodes");
+        this.insertTestHelper();
+        System.out.println("     ---------------------------------------------");
+        System.out.println("     Began removing process");
+
+        for (SinglyLinkedListNode node : this.dataList) {
+            if (!this.openHashTable.isEmpty()) {
+                int data = (int) node.getData();
+                this.openHashTable.remove(data);
+                this.printTestHelper();
+            }
+        }
+        System.out.println("     ----------------------");
+
+        System.out.println("Finished deletingTest");
+    }
+
+    @Test
+    void repopulating() {
+        this.openHashTable = new HashTable(10, HashingTechniqueE.DIVISION, CollisionTechniqueE.DOUBLE_HASHING, M_ALLOWED_CAPACITY, MIN_ALLOWED_CAPACITY);
+        System.out.println("started deletingTest");
+        System.out.println("     inserting nodes");
+        this.insertTestHelper();
+        System.out.println("     ---------------------------------------------");
+        System.out.println("     Began removing process");
+
+        for (SinglyLinkedListNode node : this.dataList) {
+            if (!this.openHashTable.isEmpty()) {
+                int data = (int) node.getData();
+                this.openHashTable.remove(data);
+                this.printTestHelper();
+            }
+        }
+        System.out.println("     ----------------------");
+
+        System.out.println("     Began reinserting process");
+        this.insertTestHelper();
+        this.printTestHelper();
+        System.out.println("     ----------------------");
+    }
 
     @AfterEach
     void tearDown() {

@@ -1,7 +1,7 @@
-package edu.me.datastructure.hashtable;
+package edu.me.datastructure.hashtable.option;
 
 public enum HashingTechniqueE {
-    DIVISION () {
+    DIVISION {
         @Override
         public int getIndex(int hashFunctionResult, int capacity) {
             return hashFunctionResult % capacity;

@@ -1,4 +1,4 @@
-package edu.me.datastructure.hashtable;
+package edu.me.datastructure.hashtable.option;
 
 public enum CollisionTechniqueE {
     CHAINING,

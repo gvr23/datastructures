@@ -1,67 +1,124 @@
 package edu.me.datastructure.hashtable;
 
+import edu.me.datastructure.hashtable.collision.CollisionTechniqueGeneral;
+import edu.me.datastructure.hashtable.collision.DivisionCollision;
+import edu.me.datastructure.hashtable.option.HashingTechniqueE;
+import edu.me.datastructure.hashtable.option.CollisionTechniqueE;
 import edu.me.datastructure.linkedlist.SinglyLinkedList;
 import edu.me.datastructure.model.node.HashNode;
 import edu.me.datastructure.model.node.linkedlistnode.SinglyLinkedListNode;
 
-import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 public final class CollisionFactory {
     private static CollisionFactory instance;
-    private final Map<HashingTechniqueE, CollisionTechniqueImp> collisionMap = new HashMap<>();
+    private static CollisionTechniqueGeneral collisionSatelliteDivision;
+    private static HashTable hashTableClassReference;
+    private final Map<HashingTechniqueE, CollisionTechniqueGeneral> collisionMap = new HashMap<>();
 
     {
         collisionMap.put(HashingTechniqueE.DIVISION, DivisionCollision.getInstance());
+        collisionMap.put(HashingTechniqueE.FOLDING, DivisionCollision.getInstance());
+        collisionMap.put(HashingTechniqueE.MODULUS_MULTIPLICATION, DivisionCollision.getInstance());
     }
 
     private CollisionFactory() {}
 
     public static CollisionFactory getInstance() {
-        if (instance == null) instance = new CollisionFactory();
+        if (instance == null) {
+            instance = new CollisionFactory();
+            collisionSatelliteDivision = instance
+                    .getCollisionApplication(hashTableClassReference.gethMethod())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid method or technique"));
+        }
+        collisionSatelliteDivision.setColTechnique(hashTableClassReference.getcTechnique());
+
         return instance;
     }
-
-    public void collisionInsertion(HashNode item, WeakReference<HashTable> hashTableWeakReference) {
-        HashTable hashTableReference = Objects.requireNonNull(hashTableWeakReference.get());
-        int probes = 0;
-        int indexToInsertAttempt = item.getFirstCollidedLocation();
-        boolean inserted = hashTableReference.isInserted(item, indexToInsertAttempt);
-
-        CollisionTechniqueImp application = instance
-                .getCollisionApplication(hashTableReference.gethMethod())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid method or technique"));
-        application.setColTechnique(hashTableReference.getcTechnique());
-
-        if (CollisionTechniqueE.CHAINING.equals(hashTableReference.getcTechnique())) this.chainingCollision(item, hashTableReference);
-        else {
-            try {
-                while (!inserted && (probes < hashTableReference.getHashTable().length)) {
-                    probes++;
-                    indexToInsertAttempt = application.getIndex(item, probes, hashTableReference.getCapacity());
-                    inserted = hashTableReference.isInserted(item, indexToInsertAttempt);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.out.println("Error in collision index");
-            }
-        }
-    }
-
-    private void chainingCollision(HashNode item, HashTable hashTableReference) {
-        SinglyLinkedListNode newNode = ((SinglyLinkedList) item.getContent()).removeAtBeginning();
-        int index = item.getFirstCollidedLocation();
-
-        if (hashTableReference.getHashTable()[index].getContent() instanceof SinglyLinkedList) {
-            SinglyLinkedList hashList = (SinglyLinkedList) hashTableReference.getHashTable()[index].getContent();
-            hashList.insertAtEnd(newNode);
-        }
-    }
-
-    private Optional<CollisionTechniqueImp> getCollisionApplication(HashingTechniqueE hashingTechnique) {
+    private Optional<CollisionTechniqueGeneral> getCollisionApplication(HashingTechniqueE hashingTechnique) {
         return Optional.ofNullable(collisionMap.get(hashingTechnique));
+    }
+    public static void setHashTableClassReference(HashTable hashTableClassReference) {
+        CollisionFactory.hashTableClassReference = hashTableClassReference;
+    }
+
+    public Object collisionRedirection(HashNode item) {
+        Object executedSuccessFully;
+
+        if (item.isActive()) {
+            if (CollisionTechniqueE.CHAINING.equals(hashTableClassReference.getcTechnique())) executedSuccessFully = this.chainingCollision(item);
+            else executedSuccessFully = this.insertionProcess(item);
+        } else executedSuccessFully = this.collisionSearch(item);
+
+        return executedSuccessFully;
+    }
+    private boolean chainingCollision(HashNode item) {
+        boolean inserted = true;
+        try {
+            if (item.getContent() instanceof SinglyLinkedList) {
+                SinglyLinkedList newSinglyList = (SinglyLinkedList) item.getContent();
+                SinglyLinkedListNode newSinglyNode = newSinglyList.removeAtBeginning();
+                SinglyLinkedList collidedList = (SinglyLinkedList) hashTableClassReference.requestNode(item.getLocation()).getContent();
+                collidedList.insertAtEnd(newSinglyNode);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error in the chaining collision " + e.toString());
+            inserted = false;
+        }
+        return inserted;
+    }
+    private boolean insertionProcess(HashNode item) {
+        int probes = 0;
+        int indexToInsertAttempt;
+        boolean inserted = hashTableClassReference.isInserted(item, item.getFirstLevelIndex());
+
+        try {
+            int hashTableLength = hashTableClassReference.getLength();
+
+            while (!inserted && (probes < hashTableLength)) {
+                probes++;
+                indexToInsertAttempt = collisionSatelliteDivision.getIndex(item, probes, hashTableClassReference.getCapacity());
+
+                inserted = hashTableClassReference.isInserted(item, indexToInsertAttempt);
+            }
+            item.setProbes(probes);
+        } catch (Exception e) {
+            System.out.println("Error in collision index " + e.toString());
+            inserted = false;
+        }
+        return inserted;
+    }
+
+    public HashNode collisionSearch(HashNode surrogateNode) {
+        int probes = 0;
+        int indexToSearch = surrogateNode.getFirstLevelIndex();
+        boolean found = false;
+        HashNode possibleNode = hashTableClassReference.requestNode(indexToSearch);
+
+        try {
+            while (!found && (probes < hashTableClassReference.getCapacity())) {
+                probes++;
+                indexToSearch = collisionSatelliteDivision.getIndex(surrogateNode, probes, hashTableClassReference.getCapacity());
+                possibleNode = hashTableClassReference.requestNode(indexToSearch);
+                if (possibleNode != null && possibleNode.getNumericRepresentation() == surrogateNode.getNumericRepresentation()) found = true;
+            }
+            if (probes == hashTableClassReference.getCapacity()) possibleNode = null;
+        } catch (Exception e) {
+            System.out.println("Error in collision search " + e.toString());
+        }
+        return possibleNode;
+    }
+
+    public boolean collisionExists(int index) {
+        HashNode fetchedNode = hashTableClassReference.requestNode(index);
+        boolean collided = false;
+
+        if (fetchedNode != null) {
+            collided = true;
+        }
+        return collided;
     }
 }
