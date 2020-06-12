@@ -37,7 +37,7 @@ class TrieTest {
         this.testTrie.insert("vino");
         this.testTrie.insert("vitalicio");
         this.testTrie.insert("vital");
-        List<String> related = this.testTrie.autoComplete("vit");
+        List<String> related = this.testTrie.autoComplete("c");
         System.out.println(related.toString());
     }
 }

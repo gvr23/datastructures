@@ -62,7 +62,7 @@ public class Trie {
         if (this.isFirstLetterStored(wordEntry)) {
             WordModifier.getPathStack().push(new Path(this.getLastNodeOn(wordEntry)));
             WordModifier.wordBuilder.append(wordEntry, 0, wordEntry.length() - 1);
-            this.root.obtainChildren();
+            this.root.obtainQualifiedChildren();
         }
 
         return wordList;

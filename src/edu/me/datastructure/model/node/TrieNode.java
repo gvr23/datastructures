@@ -3,24 +3,23 @@ package edu.me.datastructure.model.node;
 
 import edu.me.datastructure.Trie;
 import edu.me.datastructure.model.Path;
+import java.lang.ref.WeakReference;
 import java.util.*;
 
 public class TrieNode {
     static final int ALPHABET_SIZE = 26;
     private boolean wordEnding;
     private char content;
-    private Map<Character, TrieNode> visitedChildren;
     private final TrieNode[] children;
-    private final Stack<Path> pathStack;
-    private final StringBuilder wordBuilder;
+    private final WeakReference<Stack<Path>> pathStackWeakRef;
+    private final WeakReference<StringBuilder> wordBuilderWeakRef;
 
     public TrieNode(char content) {
         this.content = content;
         this.wordEnding = false;
         this.children = new TrieNode[ALPHABET_SIZE];
-        this.visitedChildren = null;
-        this.pathStack = Trie.WordModifier.getPathStack();
-        this.wordBuilder = Trie.WordModifier.getWordBuilder();
+        this.pathStackWeakRef = new WeakReference<>(Trie.WordModifier.getPathStack());
+        this.wordBuilderWeakRef = new WeakReference<>(Trie.WordModifier.getWordBuilder());
         this.init();
     }
 
@@ -84,28 +83,32 @@ public class TrieNode {
     public void adopt(TrieNode childNode) { this.children[this.getChildLocation(childNode.getContent())] = childNode; }
     public boolean isEquivalentTo(char content) { return this.content == content; }
     public int getNumberOfChildren() { return this.children.length; }
-    public void obtainChildren() {
-        int steps;
+    public void obtainQualifiedChildren() {
+        int stepsTaken;
         Path currentPitStop;
         TrieNode currentNode;
+        Stack<Path> pathStack = this.pathStackWeakRef.get();
 
-        while (!pathStack.isEmpty()) {
-            steps = 0;
+        while (!Objects.requireNonNull(pathStack).isEmpty()) {
+            stepsTaken = 0;
             currentPitStop = pathStack.pop();
             currentNode = currentPitStop.getParent();
             Trie.WordModifier.appendChild(currentNode.getContent());
 
             if (currentNode.hasAtLeastOneChild()) this.proceedToNextChild(currentNode, currentPitStop);
-            else this.processNextSet(steps);
+            else this.processNextSet(stepsTaken);
         }
     }
 
     private void proceedToNextChild(TrieNode currentNode, Path currentPitStop) {
-        pathStack.push(currentPitStop);
-        this.visitedChildren = currentPitStop.getVisitedChildren();
-        currentNode = currentNode.getUnknownChild(this.visitedChildren.values());
+        Stack<Path> pathStack = this.pathStackWeakRef.get();
+        Map<Character, TrieNode> visitedChildren;
+
+        Objects.requireNonNull(pathStack).push(currentPitStop);
+        visitedChildren = currentPitStop.getVisitedChildren();
+        currentNode = currentNode.getUnknownChild(visitedChildren.values());
         if (currentNode != null) {
-            this.visitedChildren.put(currentNode.getContent(), currentNode);
+            visitedChildren.put(currentNode.getContent(), currentNode);
             pathStack.push(new Path(currentNode));
         }
     }
@@ -113,23 +116,26 @@ public class TrieNode {
         Path currentPitStop;
         TrieNode nextChild;
         TrieNode currentNode;
+        Stack<Path> pathStack = this.pathStackWeakRef.get();
+        Map<Character, TrieNode> visitedChildren;
+        StringBuilder wordBuilder = this.wordBuilderWeakRef.get();
 
         Trie.WordModifier.emptyBuilder();
-        while (!pathStack.isEmpty()) {
+        while (!Objects.requireNonNull(pathStack).isEmpty()) {
             currentPitStop = pathStack.pop();
             currentNode = currentPitStop.getParent();
             steps++;
             if (currentNode.hasAtLeastOneChild()) {
-                this.visitedChildren = currentPitStop.getVisitedChildren();
-                nextChild = currentNode.getUnknownChild(this.visitedChildren.values());
+                visitedChildren = currentPitStop.getVisitedChildren();
+                nextChild = currentNode.getUnknownChild(visitedChildren.values());
                 if (nextChild != null) {
-                    this.visitedChildren.put(nextChild.getContent(), nextChild);
+                    visitedChildren.put(nextChild.getContent(), nextChild);
                     pathStack.push(currentPitStop);
                     pathStack.push(new Path(nextChild));
                     break;
                 }
             }
         }
-        Trie.WordModifier.deleteVisited(wordBuilder.length() - steps, wordBuilder.length());
+        Trie.WordModifier.deleteVisited(Objects.requireNonNull(wordBuilder).length() - steps, wordBuilder.length());
     }
 }
