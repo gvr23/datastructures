@@ -1,19 +1,40 @@
 package edu.me.datastructure;
 
-import edu.me.datastructure.linkedlist.SinglyLinkedList;
+import edu.me.datastructure.model.Path;
 import edu.me.datastructure.model.node.TrieNode;
-import edu.me.datastructure.model.node.linkedlistnode.SinglyLinkedListNode;
-import edu.me.datastructure.stack.ArrayStack;
 
 import java.util.*;
 
 public class Trie {
-    private TrieNode root;
+    private final TrieNode root;
     private int wordQuantity;
+    private static final List<String> wordList = new ArrayList<>();
+    public static class WordModifier {
+        private final static StringBuilder wordBuilder = new StringBuilder();
+        private final static Stack<Path> pathStack = new Stack<>();
+
+        public static void appendChild(Character child) {
+            wordBuilder.append(child);
+        }
+
+        public static void deleteVisited(int toHere, int fromHere) {
+            wordBuilder.delete(toHere, fromHere);
+        }
+
+        public static void emptyBuilder() {
+            wordList.add(wordBuilder.toString());
+        }
+
+        public static StringBuilder getWordBuilder() {
+            return wordBuilder;
+        }
+        public static Stack<Path> getPathStack() {
+            return pathStack;
+        }
+    }
 
     public Trie(TrieNode root) {
         this.root = root;
-        this.wordQuantity = 0;
     }
 
     public void insert(String wordEntry) {
@@ -29,78 +50,28 @@ public class Trie {
         currentNode.markAsEnding();
         this.wordQuantity++;
     }
+    private char[] getCharArray(String entryWord) {
+        return entryWord.toCharArray();
+    }
+
     public TrieNode remove() {
         return null;
     }
 
     public List<String> autoComplete(String wordEntry) {
-        TrieNode currentNode;
-        StringBuilder wordBuilder;
-        List<String> wordList = null;
-        Map<Character, TrieNode> visitedChildren;
-        Stack<Path> pathStack;
-        Path currentPitStop;
-
         if (this.isFirstLetterStored(wordEntry)) {
-            int pops;
-            pathStack = new Stack<>();
-            wordList = new ArrayList<>();
-            wordBuilder = new StringBuilder();
-            currentNode = this.getLastValidChild(wordEntry);
-            pathStack.push(new Path(currentNode));
-            wordBuilder.append(wordEntry, 0, wordEntry.length() - 1);
-
-            while (!pathStack.isEmpty()) {
-                pops = 0;
-                currentPitStop = pathStack.pop();
-                currentNode = currentPitStop.getParent();
-                wordBuilder.append(currentNode.getContent());
-
-                if (currentNode.hasAtLeastOneChild()) {
-                    pathStack.push(currentPitStop);
-                    visitedChildren = currentPitStop.getVisitedChildren();
-                    currentNode = currentNode.getUnknownChild(visitedChildren.values());
-                    if (currentNode != null) {
-                        visitedChildren.put(currentNode.getContent(), currentNode);
-                        pathStack.push(new Path(currentNode));
-                    }
-                } else {
-                    TrieNode nextChild;
-                    wordList.add(wordBuilder.toString());
-                    while (!pathStack.isEmpty()) {
-                        currentPitStop = pathStack.pop();
-                        currentNode = currentPitStop.getParent();
-                        pops++;
-                        if (currentNode.hasAtLeastOneChild()) {
-                            visitedChildren = currentPitStop.getVisitedChildren();
-                            nextChild = currentNode.getUnknownChild(visitedChildren.values());
-                            if (nextChild != null) {
-                                visitedChildren.put(nextChild.getContent(), nextChild);
-                                pathStack.push(currentPitStop);
-                                pathStack.push(new Path(nextChild));
-                                break;
-                            }
-                        }
-                    }
-                    wordBuilder.delete(wordBuilder.length() - pops, wordBuilder.length());
-                }
-            }
+            WordModifier.getPathStack().push(new Path(this.getLastNodeOn(wordEntry)));
+            WordModifier.wordBuilder.append(wordEntry, 0, wordEntry.length() - 1);
+            this.root.obtainChildren();
         }
-
 
         return wordList;
     }
-    public TrieNode recordAndContinue(TrieNode parent, StringBuilder wordBuilder, Stack<TrieNode> savedPath) {
-        TrieNode[] children;
-        TrieNode newStop = null;
-        if (parent.hasAtLeastOneChild()) {
-            children = parent.getChildren();
-            savedPath.push(parent);
-        }
-        wordBuilder.append(parent.getContent());
-        return newStop;
+    private boolean isFirstLetterStored(String entryWord) {
+        char child = entryWord.charAt(0);
+        return this.root.isMy(child);
     }
-    public TrieNode getLastValidChild(String wordEntry) {
+    public TrieNode getLastNodeOn(String wordEntry) {
         char[] entryArray = wordEntry.toCharArray();
         TrieNode currentNode = this.root;
         TrieNode currentChild;
@@ -115,42 +86,8 @@ public class Trie {
         }
         return currentNode;
     }
-    public void addChild(TrieNode parent, StringBuilder wordBuilder, Character child) {
-        TrieNode[] children = parent.getChildren();
-        wordBuilder.append(parent.getChild(child));
-    }
-//    public TrieNode getNextChild(TrieNode parent) {
-//        HashMap<Character, TrieNode> children = parent.getChildren();
-//        for (Character childName : children.keySet()) {
-//            parent.getChild(childName);
-//        }
-//    }
 
     public void traverse() {
 
-    }
-    private boolean isFirstLetterStored(String entryWord) {
-        char child = entryWord.charAt(0);
-        return this.root.isMy(child);
-    }
-    private char[] getCharArray(String entryWord) {
-        return entryWord.toCharArray();
-    }
-
-    static class Path extends Stack<Map<Character , LinkedList<TrieNode>>> {
-        private final Map<Character, TrieNode> visitedChildren;
-        private final TrieNode parent;
-
-        public Path(TrieNode parent) {
-            this.visitedChildren = new HashMap<>();
-            this.parent = parent;
-        }
-
-        public TrieNode getParent() {
-            return parent;
-        }
-        public Map<Character, TrieNode> getVisitedChildren() {
-            return visitedChildren;
-        }
     }
 }

@@ -30,7 +30,14 @@ class TrieTest {
         this.testTrie.insert("cot");
         this.testTrie.insert("cut");
         this.testTrie.insert("cat");
-        List<String> related = this.testTrie.autoComplete("c");
+        this.testTrie.insert("virgilio");
+        this.testTrie.insert("voto");
+        this.testTrie.insert("viuda");
+        this.testTrie.insert("vitrina");
+        this.testTrie.insert("vino");
+        this.testTrie.insert("vitalicio");
+        this.testTrie.insert("vital");
+        List<String> related = this.testTrie.autoComplete("vit");
         System.out.println(related.toString());
     }
 }

@@ -1,20 +1,26 @@
 package edu.me.datastructure.model.node;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+
+import edu.me.datastructure.Trie;
+import edu.me.datastructure.model.Path;
+import java.util.*;
 
 public class TrieNode {
     static final int ALPHABET_SIZE = 26;
     private boolean wordEnding;
     private char content;
+    private Map<Character, TrieNode> visitedChildren;
     private final TrieNode[] children;
+    private final Stack<Path> pathStack;
+    private final StringBuilder wordBuilder;
 
     public TrieNode(char content) {
         this.content = content;
         this.wordEnding = false;
         this.children = new TrieNode[ALPHABET_SIZE];
+        this.visitedChildren = null;
+        this.pathStack = Trie.WordModifier.getPathStack();
+        this.wordBuilder = Trie.WordModifier.getWordBuilder();
         this.init();
     }
 
@@ -78,4 +84,52 @@ public class TrieNode {
     public void adopt(TrieNode childNode) { this.children[this.getChildLocation(childNode.getContent())] = childNode; }
     public boolean isEquivalentTo(char content) { return this.content == content; }
     public int getNumberOfChildren() { return this.children.length; }
+    public void obtainChildren() {
+        int steps;
+        Path currentPitStop;
+        TrieNode currentNode;
+
+        while (!pathStack.isEmpty()) {
+            steps = 0;
+            currentPitStop = pathStack.pop();
+            currentNode = currentPitStop.getParent();
+            Trie.WordModifier.appendChild(currentNode.getContent());
+
+            if (currentNode.hasAtLeastOneChild()) this.proceedToNextChild(currentNode, currentPitStop);
+            else this.processNextSet(steps);
+        }
+    }
+
+    private void proceedToNextChild(TrieNode currentNode, Path currentPitStop) {
+        pathStack.push(currentPitStop);
+        this.visitedChildren = currentPitStop.getVisitedChildren();
+        currentNode = currentNode.getUnknownChild(this.visitedChildren.values());
+        if (currentNode != null) {
+            this.visitedChildren.put(currentNode.getContent(), currentNode);
+            pathStack.push(new Path(currentNode));
+        }
+    }
+    private void processNextSet(int steps) {
+        Path currentPitStop;
+        TrieNode nextChild;
+        TrieNode currentNode;
+
+        Trie.WordModifier.emptyBuilder();
+        while (!pathStack.isEmpty()) {
+            currentPitStop = pathStack.pop();
+            currentNode = currentPitStop.getParent();
+            steps++;
+            if (currentNode.hasAtLeastOneChild()) {
+                this.visitedChildren = currentPitStop.getVisitedChildren();
+                nextChild = currentNode.getUnknownChild(this.visitedChildren.values());
+                if (nextChild != null) {
+                    this.visitedChildren.put(nextChild.getContent(), nextChild);
+                    pathStack.push(currentPitStop);
+                    pathStack.push(new Path(nextChild));
+                    break;
+                }
+            }
+        }
+        Trie.WordModifier.deleteVisited(wordBuilder.length() - steps, wordBuilder.length());
+    }
 }
