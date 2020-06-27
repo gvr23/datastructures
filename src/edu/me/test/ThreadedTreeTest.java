@@ -1,9 +1,7 @@
 import edu.me.datastructure.model.node.treenode.ThreadedNode;
 import edu.me.datastructure.tree.bynarytree.ThreadedTree;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.*;
 
-import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 
